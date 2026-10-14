@@ -1,0 +1,7 @@
+services:
+  insect-vault:
+    build: .
+    container_name: insect-vault
+    ports:
+      - "8090:80"
+    restart: unless-stopped

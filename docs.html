@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Insect Vault Technical Documentation: Micro-Entomological Anatomy synthesis engine, JavaScript API, Voronoi wing venation, and cabinet-of-curiosities field study vector specifications.">
+    <title>Technical Documentation | Insect Vault</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Noto+Serif+SC:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --archival-bg: #EFE9DC;
+            --archival-fg: #2A2520;
+            --archival-surface: #F7F3EB;
+            --archival-accent: #8B1A1A;
+            --archival-muted: #DDD5C5;
+            --archival-meta: #7A7068;
+            --grid-color: rgba(122, 112, 104, 0.08);
+        }
+
+        body { 
+            background-color: var(--archival-bg); 
+            background-image: 
+                linear-gradient(to right, var(--grid-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--grid-color) 1px, transparent 1px);
+            background-size: 30px 30px;
+            color: var(--archival-fg); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .font-tech { 
+            font-family: 'JetBrains Mono', monospace; 
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .surface-card { 
+            background: var(--archival-surface); 
+            border: 1px solid var(--archival-muted); 
+            box-shadow: 0 4px 24px -12px rgba(42, 37, 32, 0.08);
+        }
+
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(42, 37, 32, 0.06);
+            padding: 0.15rem 0.35rem;
+            border-radius: 2px;
+            font-size: 0.88em;
+        }
+
+        pre {
+            background: var(--archival-bg);
+            border-left: 3px solid var(--archival-accent);
+            padding: 1rem;
+            overflow-x: auto;
+            font-size: 0.82em;
+            margin: 0.85rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid var(--archival-muted);
+            border-left-width: 3px;
+        }
+
+        .noise-layer {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.04;
+            mix-blend-mode: multiply;
+        }
+
+        .nav-link:hover { color: var(--archival-accent); }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+    <!-- Paper Noise Overlay -->
+    <svg class="noise-layer" aria-hidden="true">
+        <filter id="fractalNoise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+        </filter>
+        <rect width="100%" height="100%" filter="url(#fractalNoise)"/>
+    </svg>
+
+    <div class="max-w-4xl mx-auto space-y-8 relative z-10">
+        <!-- Documentation Header -->
+        <header class="flex items-center justify-between border-b border-[#DDD5C5] pb-6">
+            <div class="space-y-1">
+                <a href="/" class="font-tech text-[10px] text-[#7A7068] hover:text-[#8B1A1A] transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> RETURN_TO_VAULT
+                </a>
+                <h1 class="font-tech text-xl font-bold text-[#2A2520]">TECHNICAL_DOCUMENTATION</h1>
+                <p class="text-xs text-[#7A7068]">MICRO-ENTOMOLOGICAL ANATOMY & PROCEDURAL FIELD STUDY PROTOCOLS</p>
+            </div>
+            <div class="text-right hidden sm:block">
+                <p class="font-tech text-[10px] text-[#7A7068]">VERSION: 1.0.0</p>
+                <p class="font-tech text-[10px] text-[#7A7068]">PORT: 8090</p>
+            </div>
+        </header>
+
+        <!-- Navigation Matrix -->
+        <nav class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] font-tech">
+            <a href="#overview" class="surface-card p-2 text-center hover:border-[#8B1A1A] transition-colors">01. OVERVIEW</a>
+            <a href="#pipeline" class="surface-card p-2 text-center hover:border-[#8B1A1A] transition-colors">02. PIPELINE</a>
+            <a href="#api" class="surface-card p-2 text-center hover:border-[#8B1A1A] transition-colors">03. API_SPEC</a>
+            <a href="#embed" class="surface-card p-2 text-center hover:border-[#8B1A1A] transition-colors">04. EMBED_POSTMSG</a>
+        </nav>
+
+        <!-- 01. Overview -->
+        <section id="overview" class="surface-card p-6 sm:p-8 space-y-4">
+            <h2 class="font-tech text-sm font-bold text-[#8B1A1A] border-b border-[#DDD5C5] pb-2">01. EXECUTIVE_ARCHITECTURE_OVERVIEW</h2>
+            <p class="text-xs text-[#2A2520] leading-relaxed">
+                Insect Vault is an archival procedural synthesis engine generating 19th-century cabinet-of-curiosities pin-mounted entomological field studies. Grounded in the taxonomical traditions of Carl Linnaeus's <em>Systema Naturae</em> (1758) and Dru Drury's <em>Illustrations of Natural History</em> (1770), the engine procedurally synthesizes three foundational insect orders: Coleoptera (beetles with sclerotized elytra, suture lines, and puncture striae), Lepidoptera (butterflies and moths with radial wing veins and discal cells), and Odonata (dragonflies with dense reticulated Voronoi crossveins and pterostigma cells).
+            </p>
+            <p class="text-xs text-[#2A2520] leading-relaxed">
+                Every synthesized specimen is a 100% deterministic SVG vector plate that features Swiss-Archival dual drafting borders, a 5mm Micro-Metric Caliper Rule (SCALE 10:1), an Archival Cinnabar Vermilion Seal Chop (朱砂印章 · 虫豸典藏), a realistic enameled brass entomological mounting pin at the mesothoracic disc, and single-stroke engraved Hershey cursive Latin binomen lettering.
+            </p>
+        </section>
+
+        <!-- 02. Generation Pipeline -->
+        <section id="pipeline" class="surface-card p-6 sm:p-8 space-y-4">
+            <h2 class="font-tech text-sm font-bold text-[#8B1A1A] border-b border-[#DDD5C5] pb-2">02. PROCEDURAL_SYNTHESIS_PIPELINE</h2>
+            <p class="text-xs text-[#2A2520] leading-relaxed">
+                The synthesis engine operates through five sequential anatomical phases:
+            </p>
+            <ol class="list-decimal list-inside text-xs text-[#2A2520] space-y-2">
+                <li><strong>Narrative Seed Hashing:</strong> Computes a 32-bit FNV-1a hash from the narrative sequence to seed the isolated Mulberry32 PRNG deterministically.</li>
+                <li><strong>Taxonomic Classification &amp; Binomen Derivation:</strong> Selects order (Coleoptera, Lepidoptera, Odonata), resolves genus, species epithet, family, and accession sequence identifier (e.g. <code>INV-CO-0048A2</code>).</li>
+                <li><strong>Morphological Sclerite Construction:</strong> Synthesizes head capsule, compound eye ommatidia facets, antennae morphology (lamellate, bipectinate plumose, clavate, setaceous), pronotal thoracic shield, scutellum, and 8 to 10 abdominal urotergites.</li>
+                <li><strong>Wing System &amp; Reticulation Generation:</strong> Procedurally constructs wing contours and venation. For Coleoptera: hardened elytra with 12 parallel longitudinal puncture striae. For Lepidoptera: broad forewings and hindwings with discal cells, radial veins, and submarginal lunules. For Odonata: 4 vitreous elongated wings with Costa, nodus notch, pterostigma cells, and dense Voronoi-like reticulation crossveins.</li>
+                <li><strong>Archival Cabinet Presentation:</strong> Injects Swiss-Archival dual drafting borders (outer 1.0pt, inner 0.5pt), 5mm caliper rule (SCALE 10:1), central brass mounting pin head, Cinnabar seal chop (虫豸典藏), and cursive engraved Hershey vector binomen.</li>
+            </ol>
+        </section>
+
+        <!-- 03. API Specification -->
+        <section id="api" class="surface-card p-6 sm:p-8 space-y-4">
+            <h2 class="font-tech text-sm font-bold text-[#8B1A1A] border-b border-[#DDD5C5] pb-2">03. JAVASCRIPT_API_REFERENCE</h2>
+            <p class="text-xs text-[#2A2520] leading-relaxed">
+                Insect Vault exposes a zero-dependency UMD module via <code>window.InsectDraw</code>:
+            </p>
+            
+            <h3 class="font-tech text-xs text-[#2A2520] font-semibold mt-4">InsectDraw.synthesize(seedInput, options)</h3>
+            <p class="text-xs text-[#7A7068]">Synthesizes a procedural entomological specimen and returns all anatomical parameters, taxon classification, and telemetry metrics.</p>
+            <pre><code>const specimen = InsectDraw.synthesize("Dynastes hercules Cabinet Holotype", {
+  width: 1200,
+  height: 800,
+  palette: "curio" // "curio" | "scarab" | "cyanotype" | "amber" | "malachite"
+});
+
+console.log(specimen.accessionId); // e.g. "INV-CO-0048A2"
+console.log(specimen.binomen); // e.g. "Dynastes hercules"
+console.log(specimen.metrics.wingspanStr); // e.g. "78.4 mm // 42.1 mm Body"</code></pre>
+
+            <h3 class="font-tech text-xs text-[#2A2520] font-semibold mt-4">InsectDraw.generateSvgPlate(data, options)</h3>
+            <p class="text-xs text-[#7A7068]">Generates a complete standalone SVG document complete with archival borders, caliper rule, mounting pin, and vermilion seal chop.</p>
+            <pre><code>const svgString = InsectDraw.generateSvgPlate(specimen, {
+  width: 1200,
+  height: 800,
+  palette: "scarab"
+});
+// Save to file or inject into DOM</code></pre>
+
+            <h3 class="font-tech text-xs text-[#2A2520] font-semibold mt-4">InsectDraw.renderToCanvas(data, canvas, options)</h3>
+            <p class="text-xs text-[#7A7068]">Renders the specimen onto an HTML5 canvas at any target resolution for high-resolution 300 DPI PNG export.</p>
+            <pre><code>const canvas = document.createElement('canvas');
+canvas.width = 2400;
+canvas.height = 2400;
+await InsectDraw.renderToCanvas(specimen, canvas, {
+  palette: "curio"
+});
+const pngDataUrl = canvas.toDataURL('image/png');</code></pre>
+        </section>
+
+        <!-- 04. Embed & PostMessage -->
+        <section id="embed" class="surface-card p-6 sm:p-8 space-y-4">
+            <h2 class="font-tech text-sm font-bold text-[#8B1A1A] border-b border-[#DDD5C5] pb-2">04. EMBED_INTEGRATION_PROTOCOL</h2>
+            <p class="text-xs text-[#2A2520] leading-relaxed">
+                Add <code>mode=embed</code> to any Insect Vault URL to enable distraction-free specimen rendering optimized for responsive iframes:
+            </p>
+            <pre><code>&lt;iframe 
+  src="https://insect-vault.glassgallery.my.id/?id=INV-CO-0048A2&amp;palette=curio&amp;w=1&amp;h=1&amp;mode=embed" 
+  width="100%" 
+  height="600" 
+  frameborder="0" 
+  style="border:1px solid #DDD5C5; background:#EFE9DC;"&gt;
+&lt;/iframe&gt;</code></pre>
+
+            <h3 class="font-tech text-xs text-[#2A2520] font-semibold mt-4">Dynamic postMessage Controller</h3>
+            <pre><code>// Send new entomology parameters to embedded iframe
+const iframe = document.querySelector('iframe');
+iframe.contentWindow.postMessage({
+  seed: "Anax imperator Vitreous Dragonfly Wingspan",
+  palette: "cyanotype",
+  w: 16,
+  h: 9
+}, "*");</code></pre>
+        </section>
+
+        <footer class="border-t border-[#DDD5C5] pt-6 flex justify-between items-center text-[10px] font-tech text-[#7A7068]">
+            <p>INSECT_VAULT // TECHNICAL DOCUMENTATION PROTOCOL</p>
+            <p>&copy; 2026 AZZAR BUDIYANTO</p>
+        </footer>
+    </div>
+</body>
+</html>

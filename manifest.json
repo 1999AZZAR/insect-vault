@@ -1,0 +1,30 @@
+{
+  "name": "Insect Vault | Micro-Entomological Anatomy Vector Engine",
+  "short_name": "InsectVault",
+  "description": "Archival procedural entomology synthesis engine, vector Coleoptera, Lepidoptera, and Odonata anatomical studies with Voronoi wing venation.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#E8E0D0",
+  "theme_color": "#8B1A1A",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

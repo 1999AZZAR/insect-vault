@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="64" fill="#E8E0D0"/>
+  <!-- Archival Framing -->
+  <rect x="36" y="36" width="440" height="440" rx="20" fill="none" stroke="#2A2520" stroke-width="6"/>
+  <rect x="58" y="58" width="396" height="396" rx="12" fill="none" stroke="#7A7068" stroke-width="2.5"/>
+  
+  <!-- Caliper Scale Ticks Bottom -->
+  <line x1="85" y1="410" x2="210" y2="410" stroke="#7A7068" stroke-width="3"/>
+  <line x1="85" y1="400" x2="85" y2="410" stroke="#7A7068" stroke-width="3"/>
+  <line x1="147" y1="403" x2="147" y2="410" stroke="#7A7068" stroke-width="2.5"/>
+  <line x1="210" y1="400" x2="210" y2="410" stroke="#7A7068" stroke-width="3"/>
+
+  <!-- Pinned Beetle Anatomical Silhouette -->
+  <!-- Mandibles & Antennae -->
+  <path d="M 256 122 Q 240 85 218 75 M 256 122 Q 272 85 294 75" fill="none" stroke="#2A2520" stroke-width="5" stroke-linecap="round"/>
+  <path d="M 242 138 Q 180 106 144 96 M 270 138 Q 332 106 368 96" fill="none" stroke="#2A2520" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Head Capsule -->
+  <path d="M 240 150 C 235 133, 277 133, 272 150 L 267 165 L 245 165 Z" fill="#2A2520" stroke="#2A2520" stroke-width="2.5"/>
+  
+  <!-- Compound Eyes -->
+  <circle cx="232" cy="144" r="7.5" fill="#8B1A1A"/>
+  <circle cx="280" cy="144" r="7.5" fill="#8B1A1A"/>
+
+  <!-- Pronotal Shield -->
+  <path d="M 256 165 C 213 165, 197 192, 208 224 C 224 235, 288 235, 304 224 C 315 192, 299 165, 256 165 Z" fill="#3E2E20" stroke="#2A2520" stroke-width="5"/>
+
+  <!-- Hardened Elytra (Wing Sheaths) -->
+  <path d="M 256 229 C 218 235, 186 272, 197 336 C 202 368, 250 378, 254 378 L 254 229 Z" fill="#2A2520" stroke="#2A2520" stroke-width="4"/>
+  <path d="M 256 229 C 294 235, 326 272, 315 336 C 310 368, 262 378, 258 378 L 258 229 Z" fill="#2A2520" stroke="#2A2520" stroke-width="4"/>
+  <!-- Dorsal Suture -->
+  <line x1="256" y1="227" x2="256" y2="378" stroke="#8B1A1A" stroke-width="3"/>
+
+  <!-- Jointed Thoracic Legs -->
+  <path d="M 213 192 L 165 160 L 138 133" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 299 192 L 347 160 L 374 133" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 202 229 L 149 229 L 122 256" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 310 229 L 363 229 L 390 256" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 208 267 L 155 309 L 133 357" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+  <path d="M 304 267 L 357 309 L 379 357" fill="none" stroke="#2A2520" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Central Enameled Brass Entomological Mounting Pin -->
+  <circle cx="256" cy="197" r="11" fill="#1A1715" stroke="#B38F53" stroke-width="4"/>
+  <circle cx="253" cy="194" r="4" fill="#EFE9DC" opacity="0.6"/>
+</svg>

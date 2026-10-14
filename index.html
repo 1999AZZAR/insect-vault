@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insect Vault // Micro-Entomological Anatomy Vector Synthesis Engine</title>
+    
+    <!-- Meta tags for SEO / AIO -->
+    <meta name="description" content="Insect Vault: Swiss-Archival procedural entomology synthesis engine. Procedural Coleoptera, Lepidoptera, and Odonata anatomical studies with Voronoi wing venation and 5mm micro-metric caliper rule.">
+    <meta name="keywords" content="entomology, procedural insect, insect anatomy, coleoptera, lepidoptera, odonata, voronoi wing venation, cabinet of curiosities, swiss archival, procedural svg">
+    <meta name="author" content="Azzar Budiyanto">
+    <meta name="theme-color" content="#EFE9DC">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icon-192.svg">
+    <link rel="apple-touch-icon" href="icon-192.svg">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome & Tailwind -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Newsreader', 'Cinzel', 'serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        tech: ['"JetBrains Mono"', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --archival-bg: #EFE9DC;
+            --archival-surface: #E8E0D0;
+            --archival-border: #DDD5C5;
+            --archival-ink: #2A2520;
+            --archival-muted: #7A7068;
+            --archival-accent: #8B1A1A;
+        }
+
+        body {
+            background-color: var(--archival-bg);
+            color: var(--archival-ink);
+            font-family: 'Newsreader', serif;
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            opacity: 0.035;
+            z-index: 9998;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .surface-card {
+            background-color: var(--archival-surface);
+            border: 1px solid var(--archival-border);
+        }
+
+        input, select {
+            background-color: var(--archival-bg) !important;
+            border: 1px solid var(--archival-border) !important;
+            color: var(--archival-ink) !important;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--archival-accent) !important;
+        }
+
+        #render-target svg, #render-target canvas {
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+            max-width: 95%;
+            max-height: 95%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            box-shadow: 0 6px 20px -8px rgba(42, 37, 32, 0.12);
+        }
+
+        /* Matrix Control Styling */
+        .ratio-btn, .palette-chip {
+            border: 1px solid var(--archival-muted);
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+        .ratio-btn:hover, .palette-chip:hover { border-color: var(--archival-accent); color: var(--archival-accent); }
+        .ratio-btn[data-active="true"], .palette-chip[data-active="true"] {
+            background: var(--archival-accent);
+            color: var(--archival-surface);
+            border-color: var(--archival-accent);
+        }
+
+        /* Interactive Hardware Cursor */
+        .custom-cursor, .custom-cursor-trail {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 9999;
+            transform: translate3d(calc(var(--x, -100px) - 50%), calc(var(--y, -100px) - 50%), 0) scale(var(--scale, 1));
+            will-change: transform;
+            display: none;
+        }
+        @media (pointer: fine) {
+            .custom-cursor, .custom-cursor-trail { display: block; }
+        }
+        .custom-cursor {
+            width: 6px;
+            height: 6px;
+            background-color: var(--archival-accent);
+            transition: transform 0.1s ease-out;
+        }
+        .custom-cursor-trail {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--archival-accent);
+            opacity: 0.35;
+            transition: transform 0.25s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.2s ease;
+        }
+        .custom-cursor.hover { --scale: 1.5; }
+        .custom-cursor-trail.hover { --scale: 1.5; background-color: rgba(139, 26, 26, 0.08); opacity: 0.8; }
+
+        /* Fullscreen Viewer */
+        #fullscreen-btn {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer !important;
+            z-index: 30;
+        }
+        .group:hover #fullscreen-btn { opacity: 1; }
+
+        #fullscreen-viewer.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Embed Mode */
+        body[data-mode="embed"] { 
+            background: transparent !important;
+            padding: 0 !important; 
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+        body[data-mode="embed"] .custom-cursor,
+        body[data-mode="embed"] .custom-cursor-trail,
+        body[data-mode="embed"] .noise-layer,
+        body[data-mode="embed"] #fullscreen-viewer,
+        body[data-mode="embed"] #fullscreen-btn,
+        body[data-mode="embed"] section,
+        body[data-mode="embed"] header,
+        body[data-mode="embed"] footer {
+            display: none !important;
+        }
+        body[data-mode="embed"] main {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        body[data-mode="embed"] #viewport-container {
+            width: 100vw !important;
+            height: 100vh !important;
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <div class="noise-layer"></div>
+    <div class="custom-cursor"></div>
+    <div class="custom-cursor-trail"></div>
+
+    <main class="max-w-[1440px] mx-auto grid grid-cols-1 md:grid-cols-5 gap-6">
+        <!-- Viewport Plate Area -->
+        <section class="md:col-span-3 flex flex-col justify-between surface-card p-6 rounded-sm relative min-h-[580px] group border border-[#DDD5C5]">
+            <div class="flex justify-between items-center text-[11px] font-tech text-[#7A7068] border-b border-[#DDD5C5] pb-3">
+                <span class="tracking-widest">SPECIMEN // MICRO_ENTOMOLOGICAL_ANATOMY</span>
+                <span class="font-semibold text-[#8B1A1A]">PLATE NO. IV-1884</span>
+            </div>
+
+            <div id="render-target" class="flex-1 flex items-center justify-center p-2 relative my-4 overflow-hidden min-h-[460px]">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                    <i class="fa-solid fa-spinner fa-spin text-2xl text-[#8B1A1A]"></i>
+                    <span class="font-tech text-xs tracking-wider text-[#7A7068]">SYNTHESIZING ENTOMOLOGICAL ANATOMY...</span>
+                </div>
+            </div>
+
+            <!-- Fullscreen Inspect Button -->
+            <button id="fullscreen-btn" class="absolute top-10 right-10 bg-[#E8E0D0] border border-[#DDD5C5] p-2.5 text-[#2A2520] hover:text-[#8B1A1A] hover:border-[#8B1A1A] transition-all shadow-sm rounded-sm" title="Inspect Fullscreen Specimen">
+                <i class="fa-solid fa-expand text-xs"></i>
+            </button>
+
+            <div class="flex justify-between items-center text-[10px] font-tech text-[#7A7068] border-t border-[#DDD5C5] pt-3">
+                <span>CHÓNG ZHÌ DIǍN CÁNG · 虫豸典藏</span>
+                <span>CABINET-OF-CURIOSITIES SPECIMEN REGISTER</span>
+            </div>
+        </section>
+
+        <!-- Right Control & Telemetry Panel -->
+        <section class="md:col-span-2 flex flex-col justify-between surface-card p-6 rounded-sm space-y-6">
+            <div class="space-y-6">
+                <div class="flex justify-between items-center border-b border-[#DDD5C5] pb-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-bug text-[#8B1A1A] text-xs"></i>
+                        <h1 class="font-tech text-xs tracking-wider font-semibold text-[#2A2520] uppercase">SYNTHESIS ENGINE</h1>
+                    </div>
+                    <span class="font-tech text-[10px] text-[#7A7068]">REV 1.0.0</span>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- 01. Format Matrix -->
+                    <div class="space-y-2">
+                        <label class="font-tech text-[9px] text-[#7A7068]">FORMAT_MATRIX</label>
+                        <div class="grid grid-cols-3 gap-2" id="format-matrix">
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="9" data-h="16">9:16</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="2" data-h="3">2:3</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="3" data-h="4">3:4</button>
+                            
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="4" data-h="5">4:5</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="1" data-h="1" data-active="true">1:1</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="5" data-h="4">5:4</button>
+                            
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="4" data-h="3">4:3</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="3" data-h="2">3:2</button>
+                            <button class="ratio-btn py-2 text-[10px] font-tech font-semibold bg-[#E8E0D0]" data-w="16" data-h="9">16:9</button>
+                        </div>
+                    </div>
+
+                    <!-- 02. Archival Order Pigment Palette -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="font-tech text-[9px] text-[#7A7068]">ARCHIVAL_CABINET_PALETTE</label>
+                            <span id="palette-active-label" class="font-tech text-[8px] text-[#8B1A1A] font-semibold">CURIO</span>
+                        </div>
+                        <div class="grid grid-cols-5 gap-1.5" id="palette-matrix">
+                            <button class="palette-chip py-1.5 px-1.5 text-[8.5px] font-tech flex items-center justify-center gap-1 bg-[#E8E0D0]" data-palette="curio" data-active="true" title="Archival Curio">
+                                <span class="w-2 h-2 rounded-full bg-[#EFE9DC] border border-[#2A2520]"></span> CURIO
+                            </button>
+                            <button class="palette-chip py-1.5 px-1.5 text-[8.5px] font-tech flex items-center justify-center gap-1 bg-[#E8E0D0]" data-palette="scarab" title="Scarab Melanic">
+                                <span class="w-2 h-2 rounded-full bg-[#181614]"></span> SCARAB
+                            </button>
+                            <button class="palette-chip py-1.5 px-1.5 text-[8.5px] font-tech flex items-center justify-center gap-1 bg-[#E8E0D0]" data-palette="cyanotype" title="Prussian Cyanotype">
+                                <span class="w-2 h-2 rounded-full bg-[#0D1B2A]"></span> CYAN
+                            </button>
+                            <button class="palette-chip py-1.5 px-1.5 text-[8.5px] font-tech flex items-center justify-center gap-1 bg-[#E8E0D0]" data-palette="amber" title="Baltic Amber">
+                                <span class="w-2 h-2 rounded-full bg-[#F6EBD9] border border-[#3D2612]"></span> AMBER
+                            </button>
+                            <button class="palette-chip py-1.5 px-1.5 text-[8.5px] font-tech flex items-center justify-center gap-1 bg-[#E8E0D0]" data-palette="malachite" title="Verdigris Herbarium">
+                                <span class="w-2 h-2 rounded-full bg-[#1B352B]"></span> MALACH
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 03. Narrative Injection Seed -->
+                    <div class="space-y-1.5 pt-1">
+                        <div class="flex justify-between items-center">
+                            <label class="font-tech text-[9px] text-[#7A7068]">NARRATIVE_INJECTION_SEED</label>
+                            <button id="random-btn" class="font-tech text-[9px] text-[#8B1A1A] hover:underline flex items-center gap-1 cursor-pointer">
+                                <i class="fa-solid fa-dice"></i> [ RANDOM NARRATIVE ]
+                            </button>
+                        </div>
+                        <div class="relative group">
+                            <i class="fa-solid fa-terminal absolute left-4 top-1/2 -translate-y-1/2 text-[#7A7068] group-focus-within:text-[#8B1A1A] transition-colors mt-0.5"></i>
+                            <input type="text" id="seed-input" placeholder="Inject narrative sequence..." 
+                                   class="w-full pl-10 pr-4 py-2.5 text-xs font-mono font-medium rounded-sm"
+                                   autocomplete="off" maxlength="128" spellcheck="false" value="Dynastes hercules Cabinet Holotype">
+                        </div>
+                    </div>
+
+                    <!-- 04. Recover From ID -->
+                    <div class="space-y-1.5">
+                        <label class="font-tech text-[9px] text-[#7A7068]">RECOVER_FROM_ID</label>
+                        <div class="relative group">
+                            <i class="fa-solid fa-fingerprint absolute left-4 top-1/2 -translate-y-1/2 text-[#7A7068] group-focus-within:text-[#8B1A1A] transition-colors"></i>
+                            <input type="text" id="id-load-input" placeholder="Recover from ID (e.g. INV-CO-0048A2)..." 
+                                   class="w-full pl-10 pr-4 py-2.5 text-xs font-mono font-medium rounded-sm"
+                                   autocomplete="off" maxlength="18" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <!-- 05. Entomological Telemetry Matrix / Info Card -->
+                    <div class="space-y-2 border border-[#DDD5C5] bg-[#E8E0D0] p-3 rounded-sm">
+                        <div class="flex justify-between items-center border-b border-[#DDD5C5] pb-1.5">
+                            <span class="font-tech text-[9px] font-bold text-[#2A2520]">03 // ENTOMOLOGICAL_TELEMETRY</span>
+                            <span id="accession-badge" class="font-tech text-[8px] text-[#8B1A1A] font-semibold">INV-CO-000000</span>
+                        </div>
+
+                        <!-- Highlighted Derived Title from Narrative -->
+                        <div class="border-b border-[#DDD5C5] pb-2 pt-0.5">
+                            <div class="flex justify-between items-center text-[9px] font-tech">
+                                <span class="text-[#7A7068] text-[8px] uppercase tracking-wider">DERIVED TAXONOMIC CLASSIFICATION</span>
+                                <span class="text-[#7A7068] text-[7px] font-mono">NARRATIVE &rarr; SEED &rarr; ID &rarr; TAXON</span>
+                            </div>
+                            <div class="flex items-center gap-2 mt-0.5">
+                                <i class="fa-solid fa-bug text-[#8B1A1A] text-[10px]"></i>
+                                <span id="tel-binomen" class="text-xs font-serif italic font-bold text-[#2A2520] tracking-wide">Dynastes hercules</span>
+                                <span id="tel-common" class="text-[8px] font-mono text-[#7A7068]">(Hercules Beetle)</span>
+                            </div>
+                            <div id="tel-meaning" class="text-[8px] font-mono text-[#7A7068] italic truncate">Pin-mounted holotype with hyper-reticulated membranous venation & sclerotized tergites.</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-x-3 gap-y-1.5 text-[9px] font-tech pt-1">
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">ORDO &middot; SYSTEMATICS</span>
+                                <span id="tel-order" class="text-[#2A2520] font-semibold truncate block">COLEOPTERA</span>
+                            </div>
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">FAMILIA</span>
+                                <span id="tel-family" class="text-[#2A2520] font-semibold truncate block">Scarabaeidae</span>
+                            </div>
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">CHITIN SCLEROTIZATION</span>
+                                <span id="tel-hardness" class="text-[#2A2520] font-semibold truncate block">Mohs 3.8 / Sclerotized Cuticle</span>
+                            </div>
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">WINGSPAN // BODY</span>
+                                <span id="tel-wingspan" class="text-[#2A2520] font-semibold truncate block">78.4 mm // 42.1 mm Body</span>
+                            </div>
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">ANTENNAE FORM</span>
+                                <span id="tel-antennae" class="text-[#2A2520] font-semibold truncate block">Flabellate Lamellar</span>
+                            </div>
+                            <div>
+                                <span class="text-[#7A7068] block text-[8px]">VENATION RETICULATION</span>
+                                <span id="tel-venation" class="text-[#2A2520] font-semibold truncate block">1,248 Reticulated Cells</span>
+                            </div>
+                            <div class="col-span-2">
+                                <span class="text-[#7A7068] block text-[8px]">CURATORIAL PROVENANCE</span>
+                                <span id="tel-epoch" class="text-[#2A2520] font-semibold truncate block">Anno 1884 // Muséum d'Histoire Naturelle</span>
+                            </div>
+                            <div class="col-span-2 flex justify-between items-center pt-0.5 border-t border-[#DDD5C5]">
+                                <div>
+                                    <span class="text-[#7A7068] text-[8px]">CALIPER RULE: </span>
+                                    <span class="text-[#2A2520] font-semibold">5mm / SCALE 10:1</span>
+                                </div>
+                                <div>
+                                    <span class="text-[#7A7068] text-[8px]">PTR: </span>
+                                    <span id="tel-hash" class="text-[#2A2520] font-semibold">0x00000000</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action & Export Footer -->
+            <footer class="space-y-4 pt-4 border-t border-[#DDD5C5]">
+                <div class="flex justify-between items-center bg-[#E8E0D0] px-3 py-2 border border-[#DDD5C5]">
+                    <span id="specimen-id" class="font-tech text-[10px] text-[#2A2520] font-semibold">SEQ: INV-CO-000000</span>
+                    <span id="hash-metric" class="font-tech text-[9px] text-[#7A7068]">AWAITING...</span>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button id="copy-btn" class="font-tech text-[10px] text-[#2A2520] hover:text-[#8B1A1A] transition-all flex items-center justify-center gap-2 px-4 py-2 border border-[#DDD5C5] hover:border-[#8B1A1A] bg-[#E8E0D0] w-1/2 cursor-pointer">
+                        <i class="fa-solid fa-code"></i> [ SVG ]
+                    </button>
+                    <button id="png-btn" class="font-tech text-[10px] text-[#2A2520] hover:text-[#8B1A1A] transition-all flex items-center justify-center gap-2 px-4 py-2 border border-[#DDD5C5] hover:border-[#8B1A1A] bg-[#E8E0D0] w-1/2 cursor-pointer">
+                        <i class="fa-solid fa-download"></i> [ PNG ]
+                    </button>
+                </div>
+                <button id="embed-btn" class="font-tech text-[10px] text-[#7A7068] hover:text-[#8B1A1A] transition-all flex items-center justify-center gap-2 px-4 py-2 border border-[#DDD5C5] hover:border-[#8B1A1A] bg-[#E8E0D0] w-full cursor-pointer">
+                    <i class="fa-solid fa-share-nodes"></i> [ GENERATE EMBED PROTOCOL ]
+                </button>
+            </footer>
+        </section>
+
+        <!-- Archival Metadata Section for SEO/AIO -->
+        <section id="specimen-metadata" class="md:col-span-5 surface-card p-8 rounded-sm space-y-8 mt-6">
+            <div class="prose max-w-none">
+                <h2 class="font-tech text-sm font-semibold border-b border-[#DDD5C5] pb-2 text-[#8B1A1A]">01. ARCHIVAL_ENTOMOLOGY_OVERVIEW</h2>
+                <p class="text-sm text-[#2A2520] leading-relaxed">
+                    Insect Vault is an archival procedural entomology synthesis engine and vector anatomical repository modeled after 19th-century cabinet-of-curiosities pin-mounted field studies. Drawing upon the classical taxonomic methodologies of Carl Linnaeus's <em>Systema Naturae</em> (1758) and Dru Drury's <em>Illustrations of Natural History</em> (1770), the engine procedurally synthesizes insect specimens across three seminal orders: Coleoptera (beetles with sclerotized elytra and puncture striae), Lepidoptera (butterflies and moths with radial wing venation and discal cells), and Odonata (dragonflies with dense reticulated Voronoi wing venation and pterostigma cells).
+                </p>
+
+                <h2 class="font-tech text-sm font-semibold border-b border-[#DDD5C5] pb-2 text-[#8B1A1A] mt-8">02. PROCEDURAL_ANATOMY_PIPELINE</h2>
+                <p class="text-sm text-[#2A2520] leading-relaxed">
+                    By injecting descriptive narrative strings into the system, the engine hashes the input to establish anatomical morphology, head mouthparts (pincer mandibles, proboscis), antennae typology (lamellate, bipectinate plumose, clavate), thoracic chitin sclerites, articulated spinose legs, and orders of wing venation. Every specimen is an immutable archival record deterministically reproducible via its accession identifier (e.g. <code>INV-CO-0048A2</code>) and cryptographic pointer hash.
+                </p>
+
+                <h2 class="font-tech text-sm font-semibold border-b border-[#DDD5C5] pb-2 text-[#8B1A1A] mt-8">03. ARCHIVAL_EXPORT_PROTOCOL</h2>
+                <p class="text-sm text-[#2A2520] leading-relaxed">
+                    Specimens can be exported as clean standalone SVG vector documents or 300 DPI high-resolution PNG plates conforming to the Swiss-Archival design standards. Each exported plate integrates archival double drafting borders, a 5mm Micro-Metric Caliper Rule (SCALE 10:1), an Archival Cinnabar Vermilion Seal Chop (朱砂印章 &middot; 虫豸典藏), an enameled brass entomological mounting pin, and an authentic Hershey single-stroke cursive Latin binomen.
+                </p>
+
+                <h2 class="font-tech text-sm font-semibold border-b border-[#DDD5C5] pb-2 text-[#8B1A1A] mt-8">04. EMBED_INTEGRATION_PROTOCOL</h2>
+                <p class="text-sm text-[#2A2520] leading-relaxed">
+                    Insect Vault functions as an embeddable micro-service. Appending the <code>mode=embed</code> query parameter reduces the UI to an isolated specimen view optimized for responsive iframes. Host applications can dynamically command the synthesis engine in real-time via the bidirectional <code>postMessage</code> protocol.
+                </p>
+
+                <h2 class="font-tech text-sm font-semibold border-b border-[#DDD5C5] pb-2 text-[#8B1A1A] mt-8">05. PROGRAMMATIC_ARCHIVAL_ACCESS</h2>
+                <p class="text-sm text-[#2A2520] leading-relaxed">
+                    The underlying engine exposes pure zero-dependency JavaScript access via <code>window.InsectDraw</code>. Curators and developers can synthesize specimens, query telemetry metrics, and render vector plates programmatically in Node.js or browser environments.
+                </p>
+
+                <div class="pt-4 border-t border-[#DDD5C5] flex justify-between items-center">
+                    <a href="docs.html" class="font-tech text-xs text-[#8B1A1A] hover:underline flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-book-open"></i> [ READ_FULL_DOCUMENTATION_PROTOCOL ]
+                    </a>
+                    <span class="font-tech text-[10px] text-[#7A7068]">INSECT_VAULT // TECHNICAL_SPECIFICATION_V1.0</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Fullscreen Specimen Viewer Modal -->
+    <div id="fullscreen-viewer" class="fixed inset-0 z-50 bg-[#EFE9DC] hidden flex-col justify-between p-6">
+        <div class="flex justify-between items-center border-b border-[#DDD5C5] pb-3 text-xs font-tech text-[#7A7068]">
+            <span id="viewer-title">INSECT VAULT // FULLSCREEN_SPECIMEN_INSPECTION</span>
+            <div class="flex items-center gap-4">
+                <span id="viewer-seq" class="text-[#8B1A1A] font-semibold">SEQ: INV-00-000000</span>
+                <button id="viewer-close" class="hover:text-[#8B1A1A] text-sm cursor-pointer"><i class="fa-solid fa-xmark"></i> [ CLOSE ]</button>
+            </div>
+        </div>
+        <div id="viewer-content" class="flex-1 flex items-center justify-center p-4 overflow-hidden">
+            <!-- Fullscreen SVG will be injected here -->
+        </div>
+        <div class="flex justify-between items-center border-t border-[#DDD5C5] pt-3 text-[10px] font-tech text-[#7A7068]">
+            <span>HIGH-RESOLUTION VECTOR PROJECTION</span>
+            <div class="flex gap-4">
+                <button id="viewer-download-svg" class="hover:text-[#8B1A1A] cursor-pointer"><i class="fa-solid fa-code"></i> [ DOWNLOAD_SVG ]</button>
+                <button id="viewer-download-png" class="hover:text-[#8B1A1A] cursor-pointer"><i class="fa-solid fa-download"></i> [ DOWNLOAD_PNG ]</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Engine Scripts -->
+    <script src="js/insectdraw.js"></script>
+    <script>
+        (function () {
+            const NARRATIVE_TOPICS = [
+                "Dynastes hercules Holotype Cabinet Study",
+                "Lucanus cervus Pincer Mandible Examination",
+                "Morpho hecuba Reticulated Wing Venation",
+                "Attacus atlas Discal Cell Sclerotization",
+                "Anax imperator Vitreous Dragonfly Wingspan",
+                "Titanus giganteus Neotropical Longhorn Anatomy",
+                "Papilio ulysses Submarginal Lunule Ocelli",
+                "Calopteryx virgo Nodal Pterostigma Micro-Mesh",
+                "Goliathus regius Sclerotized Pronotal Shield",
+                "Chrysina resplendens Golden Scarab Cuticle"
+            ];
+
+            const STATE = {
+                currentRatio: { w: 1, h: 1 },
+                currentPalette: 'curio',
+                currentSpecimen: null,
+                currentSeed: 'Dynastes hercules Cabinet Holotype'
+            };
+
+            const DOM = {
+                target: document.getElementById('render-target'),
+                seedInput: document.getElementById('seed-input'),
+                idLoadInput: document.getElementById('id-load-input'),
+                randomBtn: document.getElementById('random-btn'),
+                ratioBtns: document.querySelectorAll('.ratio-btn'),
+                paletteBtns: document.querySelectorAll('.palette-chip'),
+                paletteActiveLabel: document.getElementById('palette-active-label'),
+                accessionBadge: document.getElementById('accession-badge'),
+                specimenId: document.getElementById('specimen-id'),
+                hashMetric: document.getElementById('hash-metric'),
+                fullscreenBtn: document.getElementById('fullscreen-btn'),
+                fullscreenViewer: document.getElementById('fullscreen-viewer'),
+                viewerContent: document.getElementById('viewer-content'),
+                viewerClose: document.getElementById('viewer-close'),
+                viewerTitle: document.getElementById('viewer-title'),
+                viewerSeq: document.getElementById('viewer-seq'),
+                viewerDownloadSvg: document.getElementById('viewer-download-svg'),
+                viewerDownloadPng: document.getElementById('viewer-download-png'),
+                copyBtn: document.getElementById('copy-btn'),
+                pngBtn: document.getElementById('png-btn'),
+                embedBtn: document.getElementById('embed-btn'),
+                // Telemetry Elements
+                telBinomen: document.getElementById('tel-binomen'),
+                telCommon: document.getElementById('tel-common'),
+                telMeaning: document.getElementById('tel-meaning'),
+                telOrder: document.getElementById('tel-order'),
+                telFamily: document.getElementById('tel-family'),
+                telHardness: document.getElementById('tel-hardness'),
+                telWingspan: document.getElementById('tel-wingspan'),
+                telAntennae: document.getElementById('tel-antennae'),
+                telVenation: document.getElementById('tel-venation'),
+                telEpoch: document.getElementById('tel-epoch'),
+                telHash: document.getElementById('tel-hash'),
+                // Cursor
+                cursor: document.querySelector('.custom-cursor'),
+                cursorTrail: document.querySelector('.custom-cursor-trail')
+            };
+
+            // Custom Hardware-Accelerated Cursor Logic
+            if (DOM.cursor && DOM.cursorTrail) {
+                if (!window.matchMedia('(pointer: fine)').matches || document.body.dataset.mode === 'embed') {
+                    DOM.cursor.style.display = 'none';
+                    DOM.cursorTrail.style.display = 'none';
+                } else {
+                    let mouseX = -100, mouseY = -100;
+                    let trailX = -100, trailY = -100;
+
+                    window.addEventListener('mousemove', (e) => {
+                        mouseX = e.clientX;
+                        mouseY = e.clientY;
+                        DOM.cursor.style.setProperty('--x', `${mouseX}px`);
+                        DOM.cursor.style.setProperty('--y', `${mouseY}px`);
+                    });
+
+                    function renderCursorTrail() {
+                        trailX += (mouseX - trailX) * 0.25;
+                        trailY += (mouseY - trailY) * 0.25;
+                        DOM.cursorTrail.style.setProperty('--x', `${trailX}px`);
+                        DOM.cursorTrail.style.setProperty('--y', `${trailY}px`);
+                        requestAnimationFrame(renderCursorTrail);
+                    }
+                    requestAnimationFrame(renderCursorTrail);
+
+                    const interactiveEls = document.querySelectorAll('button, input, select, a');
+                    interactiveEls.forEach(el => {
+                        el.addEventListener('mouseenter', () => {
+                            DOM.cursor.classList.add('hover');
+                            DOM.cursorTrail.classList.add('hover');
+                        });
+                        el.addEventListener('mouseleave', () => {
+                            DOM.cursor.classList.remove('hover');
+                            DOM.cursorTrail.classList.remove('hover');
+                        });
+                    });
+                }
+            }
+
+            function getDimensions(ratio) {
+                const base = 600;
+                if (ratio.w >= ratio.h) {
+                    return { w: base, h: Math.round(base * (ratio.h / ratio.w)) };
+                } else {
+                    return { w: Math.round(base * (ratio.w / ratio.h)), h: base };
+                }
+            }
+
+            function synthesizeSpecimen() {
+                const t0 = performance.now();
+                const idLoadVal = DOM.idLoadInput.value.trim();
+                let seedVal = DOM.seedInput.value.trim();
+                const dims = getDimensions(STATE.currentRatio);
+
+                let opts = {
+                    width: dims.w,
+                    height: dims.h,
+                    palette: STATE.currentPalette
+                };
+
+                if (idLoadVal && idLoadVal.includes('-')) {
+                    opts.id = idLoadVal;
+                    STATE.currentSeed = idLoadVal;
+                } else {
+                    seedVal = seedVal || 'Archival Entomological Specimen';
+                    opts.narrative = seedVal;
+                    STATE.currentSeed = seedVal;
+                }
+
+                const specimen = window.InsectDraw.synthesize(opts.narrative || opts.id, opts);
+                STATE.currentSpecimen = specimen;
+
+                // Update Telemetry Panel
+                if (DOM.accessionBadge) DOM.accessionBadge.textContent = specimen.accessionId;
+                if (DOM.specimenId) DOM.specimenId.textContent = `SEQ: ${specimen.accessionId}`;
+                if (DOM.telBinomen) DOM.telBinomen.textContent = specimen.binomen;
+                if (DOM.telCommon) DOM.telCommon.textContent = `(${specimen.taxon.common})`;
+                if (DOM.telMeaning) DOM.telMeaning.textContent = specimen.metrics.meaning;
+                if (DOM.telOrder) DOM.telOrder.textContent = specimen.metrics.orderName;
+                if (DOM.telFamily) DOM.telFamily.textContent = specimen.metrics.family;
+                if (DOM.telHardness) DOM.telHardness.textContent = specimen.metrics.hardness;
+                if (DOM.telWingspan) DOM.telWingspan.textContent = specimen.metrics.wingspanStr;
+                if (DOM.telAntennae) DOM.telAntennae.textContent = specimen.metrics.antennae;
+                if (DOM.telVenation) DOM.telVenation.textContent = specimen.metrics.venation;
+                if (DOM.telEpoch) DOM.telEpoch.textContent = specimen.metrics.epoch;
+                if (DOM.telHash) DOM.telHash.textContent = specimen.metrics.hashHex;
+
+                const tElapsed = (performance.now() - t0).toFixed(1);
+                if (DOM.hashMetric) DOM.hashMetric.textContent = `${tElapsed}MS // ${specimen.metrics.orderName}`;
+
+                renderViewport();
+
+                // Sync URL if not in embed mode
+                if (document.body.dataset.mode !== 'embed') {
+                    const url = new URL(window.location);
+                    if (idLoadVal && idLoadVal.includes('-')) {
+                        url.searchParams.set('id', idLoadVal);
+                        url.searchParams.delete('narrative');
+                        url.searchParams.delete('seed');
+                    } else {
+                        url.searchParams.set('narrative', seedVal);
+                        url.searchParams.delete('id');
+                    }
+                    url.searchParams.set('w', STATE.currentRatio.w);
+                    url.searchParams.set('h', STATE.currentRatio.h);
+                    url.searchParams.set('palette', STATE.currentPalette);
+                    window.history.replaceState({}, '', url);
+                }
+            }
+
+            function renderViewport() {
+                if (!STATE.currentSpecimen) return;
+                const dims = getDimensions(STATE.currentRatio);
+                const svgMarkup = window.InsectDraw.generateSvgPlate(STATE.currentSpecimen, {
+                    width: dims.w,
+                    height: dims.h,
+                    palette: STATE.currentPalette
+                });
+
+                DOM.target.innerHTML = svgMarkup;
+                const svgEl = DOM.target.querySelector('svg');
+                if (svgEl) {
+                    svgEl.style.aspectRatio = `${dims.w} / ${dims.h}`;
+                    svgEl.classList.add('w-full', 'h-full', 'max-h-[500px]', 'object-contain', 'transition-all');
+                }
+            }
+
+            // Aspect Ratio Matrix Selection
+            DOM.ratioBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    DOM.ratioBtns.forEach(b => b.removeAttribute('data-active'));
+                    btn.setAttribute('data-active', 'true');
+                    STATE.currentRatio = {
+                        w: parseInt(btn.dataset.w, 10),
+                        h: parseInt(btn.dataset.h, 10)
+                    };
+                    synthesizeSpecimen();
+                });
+            });
+
+            // Palette Selection Matrix
+            DOM.paletteBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    DOM.paletteBtns.forEach(b => b.removeAttribute('data-active'));
+                    btn.setAttribute('data-active', 'true');
+                    STATE.currentPalette = btn.dataset.palette;
+                    if (DOM.paletteActiveLabel) {
+                        DOM.paletteActiveLabel.textContent = STATE.currentPalette.toUpperCase();
+                    }
+                    synthesizeSpecimen();
+                });
+            });
+
+            // Random Narrative Injection
+            DOM.randomBtn.addEventListener('click', () => {
+                const topic = NARRATIVE_TOPICS[Math.floor(Math.random() * NARRATIVE_TOPICS.length)];
+                DOM.seedInput.value = topic;
+                DOM.idLoadInput.value = '';
+                synthesizeSpecimen();
+            });
+
+            // Seed Input Debounce
+            let debounceTimer = null;
+            DOM.seedInput.addEventListener('input', () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    DOM.idLoadInput.value = '';
+                    synthesizeSpecimen();
+                }, 350);
+            });
+
+            // Recover from ID
+            DOM.idLoadInput.addEventListener('input', () => {
+                if (DOM.idLoadInput.value.trim().length > 0) {
+                    DOM.seedInput.value = '';
+                }
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    synthesizeSpecimen();
+                }, 350);
+            });
+
+            // Clipboard Copy Helper
+            async function copyToClipboard(text) {
+                if (navigator.clipboard && window.isSecureContext) {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                        return true;
+                    } catch (e) {}
+                }
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = text;
+                    ta.style.position = 'fixed';
+                    ta.style.left = '-9999px';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function buttonFeedback(btn, originalHtml, successHtml) {
+                btn.innerHTML = successHtml;
+                btn.classList.add('text-[#8B1A1A]', 'border-[#8B1A1A]');
+                setTimeout(() => {
+                    btn.innerHTML = originalHtml;
+                    btn.classList.remove('text-[#8B1A1A]', 'border-[#8B1A1A]');
+                }, 2200);
+            }
+
+            // Export 1: SVG Copy & Download
+            DOM.copyBtn.addEventListener('click', async () => {
+                if (!STATE.currentSpecimen) return;
+                const dims = getDimensions(STATE.currentRatio);
+                const svgContent = window.InsectDraw.generateSvgPlate(STATE.currentSpecimen, {
+                    width: dims.w,
+                    height: dims.h,
+                    palette: STATE.currentPalette
+                });
+
+                const blob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `insect_${STATE.currentSpecimen.accessionId}_${STATE.currentSpecimen.binomen.replace(/\s+/g, '_')}.svg`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                await copyToClipboard(svgContent);
+                buttonFeedback(DOM.copyBtn, '<i class="fa-solid fa-code"></i> [ SVG ]', '<i class="fa-solid fa-check"></i> [ SVG_COPIED ]');
+            });
+
+            // Export 2: PNG Render & Download (2.5x Hi-Res)
+            DOM.pngBtn.addEventListener('click', async () => {
+                if (!STATE.currentSpecimen) return;
+                const origHtml = DOM.pngBtn.innerHTML;
+                DOM.pngBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> [ RENDERING ]';
+
+                const dims = getDimensions(STATE.currentRatio);
+                const scale = 2.5;
+                const canvasW = Math.round(dims.w * scale);
+                const canvasH = Math.round(dims.h * scale);
+
+                const svgMarkup = window.InsectDraw.generateSvgPlate(STATE.currentSpecimen, {
+                    width: dims.w,
+                    height: dims.h,
+                    palette: STATE.currentPalette
+                });
+
+                const blob = new Blob([svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = canvasW;
+                    canvas.height = canvasH;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvasW, canvasH);
+                    URL.revokeObjectURL(url);
+
+                    canvas.toBlob((pngBlob) => {
+                        const pngUrl = URL.createObjectURL(pngBlob);
+                        const a = document.createElement('a');
+                        a.href = pngUrl;
+                        a.download = `insect_${STATE.currentSpecimen.accessionId}_${STATE.currentSpecimen.binomen.replace(/\s+/g, '_')}.png`;
+                        a.click();
+                        URL.revokeObjectURL(pngUrl);
+                        buttonFeedback(DOM.pngBtn, origHtml, '<i class="fa-solid fa-check"></i> [ PNG_SAVED ]');
+                    }, 'image/png');
+                };
+
+                img.onerror = () => {
+                    DOM.pngBtn.innerHTML = origHtml;
+                    URL.revokeObjectURL(url);
+                };
+
+                img.src = url;
+            });
+
+            // Embed Protocol Generator
+            DOM.embedBtn.addEventListener('click', async () => {
+                const ratio = STATE.currentRatio;
+                const baseUrl = window.location.origin + window.location.pathname;
+                let query = `?mode=embed`;
+                if (DOM.idLoadInput.value.trim()) query += `&id=${encodeURIComponent(DOM.idLoadInput.value.trim())}`;
+                else if (DOM.seedInput.value.trim()) query += `&narrative=${encodeURIComponent(DOM.seedInput.value.trim())}`;
+                query += `&w=${ratio.w}&h=${ratio.h}&palette=${STATE.currentPalette}`;
+
+                const embedUrl = `${baseUrl}${query}`;
+                const iframeCode = `<iframe src="${embedUrl}" width="600" height="600" frameborder="0" style="border:1px solid #DDD5C5; border-radius:4px; background:#EFE9DC;" title="Insect Vault // ${STATE.currentSpecimen ? STATE.currentSpecimen.binomen : 'Entomology'}"></iframe>`;
+
+                await copyToClipboard(iframeCode);
+                buttonFeedback(DOM.embedBtn, DOM.embedBtn.innerHTML, '<i class="fa-solid fa-check"></i> [ EMBED_CODE_COPIED ]');
+            });
+
+            // Fullscreen Viewer Functions
+            DOM.fullscreenBtn.addEventListener('click', () => {
+                if (!STATE.currentSpecimen) return;
+                const dims = getDimensions(STATE.currentRatio);
+                const svgMarkup = window.InsectDraw.generateSvgPlate(STATE.currentSpecimen, {
+                    width: dims.w,
+                    height: dims.h,
+                    palette: STATE.currentPalette
+                });
+
+                DOM.viewerContent.innerHTML = svgMarkup;
+                const svg = DOM.viewerContent.querySelector('svg');
+                if (svg) {
+                    svg.style.maxWidth = '90vw';
+                    svg.style.maxHeight = '80vh';
+                    svg.style.width = 'auto';
+                    svg.style.height = 'auto';
+                }
+                DOM.viewerSeq.textContent = `SEQ: ${STATE.currentSpecimen.accessionId}`;
+                DOM.fullscreenViewer.classList.remove('hidden');
+                DOM.fullscreenViewer.classList.add('flex', 'active');
+            });
+
+            DOM.viewerClose.addEventListener('click', () => {
+                DOM.fullscreenViewer.classList.add('hidden');
+                DOM.fullscreenViewer.classList.remove('flex', 'active');
+                DOM.viewerContent.innerHTML = '';
+            });
+
+            DOM.viewerDownloadSvg.addEventListener('click', () => {
+                DOM.copyBtn.click();
+            });
+
+            DOM.viewerDownloadPng.addEventListener('click', () => {
+                DOM.pngBtn.click();
+            });
+
+            // URL Search Params & Embed Mode Initialization
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('mode') === 'embed') {
+                document.body.dataset.mode = 'embed';
+            }
+            if (params.get('narrative') || params.get('seed') || params.get('s')) {
+                DOM.seedInput.value = params.get('narrative') || params.get('seed') || params.get('s');
+                DOM.idLoadInput.value = '';
+            }
+            if (params.get('id')) {
+                DOM.idLoadInput.value = params.get('id');
+                DOM.seedInput.value = '';
+            }
+            const paletteParam = params.get('palette') || params.get('color');
+            if (paletteParam && window.InsectDraw && window.InsectDraw.PALETTES && window.InsectDraw.PALETTES[paletteParam]) {
+                STATE.currentPalette = paletteParam;
+                DOM.paletteBtns.forEach(b => {
+                    if (b.dataset.palette === STATE.currentPalette) b.setAttribute('data-active', 'true');
+                    else b.removeAttribute('data-active');
+                });
+                if (DOM.paletteActiveLabel) {
+                    DOM.paletteActiveLabel.textContent = STATE.currentPalette.toUpperCase();
+                }
+            }
+            if (params.get('w') && params.get('h')) {
+                const targetW = params.get('w');
+                const targetH = params.get('h');
+                DOM.ratioBtns.forEach(btn => {
+                    btn.removeAttribute('data-active');
+                    if (btn.dataset.w === targetW && btn.dataset.h === targetH) {
+                        btn.setAttribute('data-active', 'true');
+                        STATE.currentRatio = { w: parseInt(targetW, 10), h: parseInt(targetH, 10) };
+                    }
+                });
+            }
+
+            // PostMessage & Embed Mode Integration
+            window.addEventListener('message', (event) => {
+                const data = event.data;
+                if (!data || typeof data !== 'object') return;
+
+                if (data.narrative || data.seed) {
+                    DOM.seedInput.value = data.narrative || data.seed;
+                    DOM.idLoadInput.value = '';
+                }
+                if (data.id) {
+                    DOM.idLoadInput.value = data.id;
+                    DOM.seedInput.value = '';
+                }
+                if (data.palette && window.InsectDraw && window.InsectDraw.PALETTES && window.InsectDraw.PALETTES[data.palette]) {
+                    STATE.currentPalette = data.palette;
+                    DOM.paletteBtns.forEach(b => {
+                        if (b.dataset.palette === STATE.currentPalette) b.setAttribute('data-active', 'true');
+                        else b.removeAttribute('data-active');
+                    });
+                    if (DOM.paletteActiveLabel) {
+                        DOM.paletteActiveLabel.textContent = STATE.currentPalette.toUpperCase();
+                    }
+                }
+                if (data.w && data.h) {
+                    DOM.ratioBtns.forEach(btn => {
+                        if (btn.dataset.w == data.w && btn.dataset.h == data.h) {
+                            DOM.ratioBtns.forEach(b => b.removeAttribute('data-active'));
+                            btn.setAttribute('data-active', 'true');
+                            STATE.currentRatio = { w: parseInt(data.w, 10), h: parseInt(data.h, 10) };
+                        }
+                    });
+                }
+                synthesizeSpecimen();
+            });
+
+            // Synthesize initial specimen on boot
+            synthesizeSpecimen();
+
+            // PWA Service Worker Registration
+            if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(err => {
+                        console.warn('SW registration bypassed:', err);
+                    });
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
