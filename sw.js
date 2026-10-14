@@ -1,4 +1,4 @@
-const CACHE_NAME = 'insect-vault-v2.1.0';
+const CACHE_NAME = 'insect-vault-v2.2.1';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   '/icon-512.svg',
   '/icon-maskable.svg',
   '/js/insectdraw.v2.js',
+  '/js/insectdraw.v2.js?v=2.2.0',
   '/docs.html',
   'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Serif+SC:wght@700;900&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',

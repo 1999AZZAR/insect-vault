@@ -488,7 +488,7 @@ function put_text(txt){
     var elements = [];
 
     // Central Pin Mount Y Coordinate (mesothoracic disc)
-    var pinY = cy - 25 * s;
+    var pinY = cy - 10 * s;
 
     // Helper: Symmetrical Path String
     function symPath(coords, isClosed, fill, stroke, strokeWidth, strokeOpacity, fillOpacity) {
@@ -1262,48 +1262,6 @@ function put_text(txt){
     elements.push('    <circle cx="' + (cx - 1.2 * s).toFixed(2) + '" cy="' + (pinY - 1.2 * s).toFixed(2) + '" r="' + (pinHeadR * 0.38).toFixed(2) + '" fill="' + p.paper + '" fill-opacity="0.6" />');
     elements.push('  </g>');
 
-    // =========================================================================
-    // SCIENTIFIC LEADER CALLOUT ANNOTATIONS (Copperplate Dissection Ephemera)
-    // =========================================================================
-    var annotations = [];
-    if (order === 'coleoptera') {
-      annotations = [
-        { label: "a", text: "Mandibula dentata", targetX: cx - (isStag ? 40 : 25) * s, targetY: (pinY - 60 * s), leaderX: cx - 140 * s, leaderY: (pinY - 60 * s) },
-        { label: "b", text: "Pronotum convexum", targetX: cx - 35 * s, targetY: (pinY - 20 * s), leaderX: cx - 140 * s, leaderY: (pinY - 20 * s) },
-        { label: "c", text: "Scutellum mesothoracicum", targetX: cx + 12 * s, targetY: (pinY + 10 * s), leaderX: cx + 140 * s, leaderY: (pinY + 10 * s) },
-        { label: "d", text: "Elytron costato-punctatum", targetX: cx + 55 * s, targetY: (pinY + 55 * s), leaderX: cx + 140 * s, leaderY: (pinY + 55 * s) },
-        { label: "e", text: "Tarsus 5-articulatus", targetX: cx - 80 * s, targetY: (pinY + 110 * s), leaderX: cx - 140 * s, leaderY: (pinY + 110 * s) }
-      ];
-    } else if (order === 'lepidoptera') {
-      annotations = [
-        { label: "a", text: "Haustellum spirale", targetX: cx, targetY: (pinY - 45 * s), leaderX: cx - 140 * s, leaderY: (pinY - 45 * s) },
-        { label: "b", text: "Antenna bipectinata", targetX: cx - 50 * s, targetY: (pinY - 55 * s), leaderX: cx - 140 * s, leaderY: (pinY - 80 * s) },
-        { label: "c", text: "Cellula discalis clausa", targetX: cx - 45 * s, targetY: (pinY - 12 * s), leaderX: cx - 140 * s, leaderY: (pinY - 15 * s) },
-        { label: "d", text: "Ocellus submarginalis", targetX: cx + 110 * s, targetY: (pinY - 8 * s), leaderX: cx + 155 * s, leaderY: (pinY - 8 * s) },
-        { label: "e", text: "Ala posterior caudata", targetX: cx + 75 * s, targetY: (pinY + 70 * s), leaderX: cx + 155 * s, leaderY: (pinY + 70 * s) }
-      ];
-    } else {
-      annotations = [
-        { label: "a", text: "Oculus compositus", targetX: cx - 22 * s, targetY: (pinY - 32 * s), leaderX: cx - 140 * s, leaderY: (pinY - 32 * s) },
-        { label: "b", text: "Nodus alaris", targetX: cx - 95 * s, targetY: (pinY - 18 * s), leaderX: cx - 140 * s, leaderY: (pinY - 60 * s) },
-        { label: "c", text: "Pterostigma apicale", targetX: cx + 145 * s, targetY: (pinY - 16 * s), leaderX: cx + 160 * s, leaderY: (pinY - 40 * s) },
-        { label: "d", text: "Rete venarum reticulatum", targetX: cx + 85 * s, targetY: (pinY + 12 * s), leaderX: cx + 160 * s, leaderY: (pinY + 12 * s) },
-        { label: "e", text: "Urotergita abdominalia", targetX: cx - 10 * s, targetY: (pinY + 65 * s), leaderX: cx - 140 * s, leaderY: (pinY + 65 * s) }
-      ];
-    }
-
-    elements.push('  <!-- Anatomical Leader Annotation Lines -->');
-    annotations.forEach(function (ann) {
-      elements.push('  <g class="anatomical-callout">');
-      elements.push('    <circle cx="' + ann.targetX.toFixed(2) + '" cy="' + ann.targetY.toFixed(2) + '" r="' + (1.6 * s).toFixed(2) + '" fill="' + p.accent + '" />');
-      elements.push('    <line x1="' + ann.targetX.toFixed(2) + '" y1="' + ann.targetY.toFixed(2) + '" x2="' + ann.leaderX.toFixed(2) + '" y2="' + ann.leaderY.toFixed(2) + '" stroke="' + p.meta + '" stroke-width="' + (0.5 * s).toFixed(2) + '" stroke-dasharray="2,2" />');
-      var isRight = ann.leaderX > cx;
-      var textAnchor = isRight ? "start" : "end";
-      var labelX = isRight ? ann.leaderX + 4 * s : ann.leaderX - 4 * s;
-      elements.push('    <text x="' + labelX.toFixed(2) + '" y="' + (ann.leaderY + 2.5 * s).toFixed(2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + (7 * s).toFixed(1) + '" fill="' + p.meta + '" text-anchor="' + textAnchor + '">[' + ann.label + ']</text>');
-      elements.push('  </g>');
-    });
-
     return elements.join("\n  ");
   }
 
@@ -1331,9 +1289,10 @@ function put_text(txt){
     var innerH = height - (margin + borderGap) * 2;
 
     // Scale Bar: 5mm Micro-Metric Caliper Rule (SCALE 10:1)
-    var barW = Math.max(65, Math.round(minDim * 0.16));
-    var barH = Math.max(3, Math.round(minDim * 0.006));
-    var tickH = Math.max(4, Math.round(minDim * 0.008));
+    var barW = Math.round(64 * scaleFactor);
+    var barH = Math.max(3, Math.round(3.5 * scaleFactor));
+    var segW = barW / 4;
+    var tickH = Math.max(2, Math.round(3 * scaleFactor));
     var scaleFontSize = Math.max(7, Math.round(8.5 * scaleFactor));
     var captionFontSize = Math.max(6, Math.round(6.8 * scaleFactor));
     var scaleBarX = margin + borderGap + Math.round(minDim * 0.02);
@@ -1366,43 +1325,27 @@ function put_text(txt){
       '    </style>',
       '  </defs>',
       '',
-      '  <!-- Archival Double Border Frame -->',
+      '  <!-- Archival Drafting Borders (Swiss-Archival Standard) -->',
       '  <rect x="' + margin + '" y="' + margin + '" width="' + (width - margin * 2) + '" height="' + (height - margin * 2) + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + outerLineWidth.toFixed(2) + '" />',
-      '  <rect x="' + innerX + '" y="' + innerY + '" width="' + innerW + '" height="' + innerH + '" fill="none" stroke="' + strokeColor + '" stroke-width="' + innerLineWidth.toFixed(2) + '" />',
-      '',
-      '  <!-- Corner Registration Marks -->',
-      '  <path d="M ' + (innerX + 8) + ' ' + innerY + ' L ' + (innerX + 8) + ' ' + (innerY + 8) + ' L ' + innerX + ' ' + (innerY + 8) + '" fill="none" stroke="' + p.grid + '" stroke-width="0.75" />',
-      '  <path d="M ' + (innerX + innerW - 8) + ' ' + innerY + ' L ' + (innerX + innerW - 8) + ' ' + (innerY + 8) + ' L ' + (innerX + innerW) + ' ' + (innerY + 8) + '" fill="none" stroke="' + p.grid + '" stroke-width="0.75" />',
-      '  <path d="M ' + (innerX + 8) + ' ' + (innerY + innerH) + ' L ' + (innerX + 8) + ' ' + (innerY + innerH - 8) + ' L ' + innerX + ' ' + (innerY + innerH - 8) + '" fill="none" stroke="' + p.grid + '" stroke-width="0.75" />',
-      '  <path d="M ' + (innerX + innerW - 8) + ' ' + (innerY + innerH) + ' L ' + (innerX + innerW - 8) + ' ' + (innerY + innerH - 8) + ' L ' + (innerX + innerW) + ' ' + (innerY + innerH - 8) + '" fill="none" stroke="' + p.grid + '" stroke-width="0.75" />',
-      '',
-      '  <!-- Top Archival Metadata Header -->',
-      '  <g class="archival-header" transform="translate(' + (innerX + 10) + ', ' + (innerY + 14) + ')">',
-      '    <text x="0" y="0" font-size="' + captionFontSize + '" font-weight="600" fill="' + strokeColor + '" letter-spacing="1">TAB. ' + (parseInt(specimen.metrics.hashHex.slice(-2), 16) % 30 + 1) + ' // ORDO ' + specimen.order.toUpperCase() + ' (' + specimen.taxon.family.toUpperCase() + ')</text>',
-      '    <text x="0" y="' + (captionFontSize + 4) + '" font-size="' + (captionFontSize - 1) + '" fill="' + metaColor + '">HOLOTYPE ANATOMY // ' + specimen.accessionId + '</text>',
-      '  </g>',
-      '  <g class="archival-top-right" transform="translate(' + (innerX + innerW - 10) + ', ' + (innerY + 14) + ')">',
-      '    <text x="0" y="0" font-size="' + captionFontSize + '" font-weight="600" fill="' + strokeColor + '" text-anchor="end">' + specimen.metrics.hashHex + '</text>',
-      '    <text x="0" y="' + (captionFontSize + 4) + '" font-size="' + (captionFontSize - 1) + '" fill="' + metaColor + '" text-anchor="end">' + specimen.metrics.hardness.split(' ')[0] + ' ' + specimen.metrics.hardness.split(' ')[1] + '</text>',
-      '  </g>',
+      '  <rect x="' + (margin + borderGap) + '" y="' + (margin + borderGap) + '" width="' + (width - (margin + borderGap) * 2) + '" height="' + (height - (margin + borderGap) * 2) + '" fill="none" stroke="' + metaColor + '" stroke-width="' + innerLineWidth.toFixed(2) + '" />',
       '',
       '  <!-- Anatomical Specimen Vector Layer -->',
       '  ' + insectElements,
       '',
-      '  <!-- Anatomical Structure Legend -->',
-      '  <text x="' + scaleBarX + '" y="' + (scaleBarY - 14) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + captionFontSize + '" fill="' + metaColor + '" letter-spacing="0.5">' + (specimen.order === "coleoptera" ? "a. Mandibula · b. Pronotum · c. Scutellum · d. Elytron · e. Tarsus" : (specimen.order === "lepidoptera" ? "a. Haustellum · b. Antenna · c. Cellula discalis · d. Ocellus · e. Ala caudata" : "a. Oculus · b. Nodus · c. Pterostigma · d. Reticulatio · e. Urotergita")) + '</text>',
-      '',
-      '  <!-- 5mm Micro-Metric Caliper Rule (SCALE 10:1) -->',
-      '  <g class="scale-bar" transform="translate(' + scaleBarX + ', ' + scaleBarY + ')">',
-      '    <line x1="0" y1="0" x2="' + barW + '" y2="0" stroke="' + strokeColor + '" stroke-width="' + (innerLineWidth * 1.5).toFixed(2) + '" />',
-      '    <line x1="0" y1="' + (-tickH) + '" x2="0" y2="0" stroke="' + strokeColor + '" stroke-width="' + (innerLineWidth * 1.5).toFixed(2) + '" />',
-      '    <line x1="' + (barW * 0.2) + '" y1="' + (-tickH * 0.6) + '" x2="' + (barW * 0.2) + '" y2="0" stroke="' + strokeColor + '" stroke-width="' + innerLineWidth.toFixed(2) + '" />',
-      '    <line x1="' + (barW * 0.5) + '" y1="' + (-tickH * 0.8) + '" x2="' + (barW * 0.5) + '" y2="0" stroke="' + strokeColor + '" stroke-width="' + innerLineWidth.toFixed(2) + '" />',
-      '    <line x1="' + barW + '" y1="' + (-tickH) + '" x2="' + barW + '" y2="0" stroke="' + strokeColor + '" stroke-width="' + (innerLineWidth * 1.5).toFixed(2) + '" />',
+      '  <!-- Entomological Caliper Scale Bar (5mm Micro-Metric Rule) -->',
+      '  <g class="drafting-scale-bar" transform="translate(' + scaleBarX + ', ' + scaleBarY + ')">',
+      '    <rect x="0" y="0" width="' + segW + '" height="' + barH + '" fill="' + strokeColor + '" />',
+      '    <rect x="' + segW + '" y="0" width="' + segW + '" height="' + barH + '" fill="none" stroke="' + strokeColor + '" stroke-width="0.75" />',
+      '    <rect x="' + (segW * 2) + '" y="0" width="' + segW + '" height="' + barH + '" fill="' + strokeColor + '" />',
+      '    <rect x="' + (segW * 3) + '" y="0" width="' + segW + '" height="' + barH + '" fill="none" stroke="' + strokeColor + '" stroke-width="0.75" />',
+      '    <rect x="0" y="0" width="' + barW + '" height="' + barH + '" fill="none" stroke="' + strokeColor + '" stroke-width="0.75" />',
+      '    <line x1="0" y1="' + (-tickH) + '" x2="0" y2="0" stroke="' + strokeColor + '" stroke-width="0.75" />',
+      '    <line x1="' + (segW * 2) + '" y1="' + (-tickH) + '" x2="' + (segW * 2) + '" y2="0" stroke="' + strokeColor + '" stroke-width="0.75" />',
+      '    <line x1="' + barW + '" y1="' + (-tickH) + '" x2="' + barW + '" y2="0" stroke="' + strokeColor + '" stroke-width="0.75" />',
       '    <text x="0" y="' + (-tickH - 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + scaleFontSize + '" font-weight="600" fill="' + strokeColor + '" text-anchor="middle">0</text>',
-      '    <text x="' + (barW * 0.5) + '" y="' + (-tickH - 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + scaleFontSize + '" font-weight="600" fill="' + strokeColor + '" text-anchor="middle">2.5</text>',
+      '    <text x="' + (segW * 2) + '" y="' + (-tickH - 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + scaleFontSize + '" font-weight="600" fill="' + strokeColor + '" text-anchor="middle">2.5</text>',
       '    <text x="' + barW + '" y="' + (-tickH - 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + scaleFontSize + '" font-weight="600" fill="' + strokeColor + '" text-anchor="middle">5.0mm</text>',
-      '    <text x="0" y="' + (barH + captionFontSize + 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + captionFontSize + '" font-weight="500" fill="' + metaColor + '">MICROMETRIC CALIPER (SCALE 10:1)</text>',
+      '    <text x="0" y="' + (barH + captionFontSize + 2) + '" font-family="\'JetBrains Mono\', monospace" font-size="' + captionFontSize + '" font-weight="500" fill="' + metaColor + '">MICROMETRIC SCALE 10:1</text>',
       '  </g>',
       '',
       '  <!-- Archival Vermilion Seal Chop (朱砂印章 · 虫豸典藏) -->',
