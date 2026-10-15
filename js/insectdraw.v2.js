@@ -477,784 +477,950 @@ function put_text(txt){
   }
 
   // --- 6. Procedural Anatomy Vector Generator (Enriched Copperplate Engine) ---
+
+  // ORDER 1: COLEOPTERA (Micro-Entomological Anatomy of the Chitin Armor)
+  function drawColeoptera(specimen, p, cx, cy, pinY, s, rng, h) {
+    var elements = [];
+    var taxon = specimen.taxon;
+    var morph = taxon.morphology;
+    var isStag = morph === 'stag_lucanus';
+    var isHornedDynastes = morph === 'horned_dynastes';
+    var isHornedAtlas = morph === 'horned_atlas';
+    var isLonghorn = morph === 'longhorn_cerambyx';
+    var isGoliath = morph === 'goliath_pattern';
+
+    var bL = specimen.bodyLength / s;
+    var pronoW = 48 + rng() * 10;
+    var pronoH = 36 + rng() * 8;
+    var pronoY = pinY / s - 16;
+
+    var headW = isStag ? 42 + rng() * 6 : ((isHornedDynastes || isHornedAtlas) ? 30 + rng() * 4 : 26 + rng() * 4);
+    var headH = 22 + rng() * 4;
+    var headY = pronoY - pronoH * 0.5 - headH * 0.45;
+
+    var elyW = pronoW * 1.26;
+    var elyH = bL * 0.65;
+    var abdoY0 = pronoY + pronoH * 0.5;
+
+    // 1. Membranous Flight Wing Tips (Alae) peeking out under the elytra apex
+    var wingTipY = abdoY0 + elyH;
+    var wtCoords = [
+      [2, wingTipY - 6],
+      [elyW * 0.35, wingTipY + 4],
+      [elyW * 0.28, wingTipY + 22],
+      [elyW * 0.12, wingTipY + 26],
+      [2, wingTipY + 18]
+    ];
+    elements.push(h.symPath(wtCoords, true, p.wingTint, p.ink, (0.75 * s).toFixed(2), 0.7, 0.9));
+    for (var wvi = 1; wvi <= 4; wvi++) {
+      var wvt = wvi / 5;
+      elements.push(h.symLine(elyW * 0.15 * wvt + 2, wingTipY - 2, elyW * 0.25 * wvt + 2, wingTipY + 20, p.ink, (0.5 * s).toFixed(2), 0.55));
+    }
+
+    // 2. Pygidium (Terminal Chitin Plate)
+    var pygCoords = [
+      [0, abdoY0 + elyH - 3],
+      [elyW * 0.32, abdoY0 + elyH + 2],
+      [elyW * 0.22, abdoY0 + elyH + 16],
+      [0, abdoY0 + elyH + 20]
+    ];
+    elements.push(h.symPath(pygCoords, true, p.chitin, p.ink, (1.1 * s).toFixed(2), 1.0));
+    elements.push(h.symHatch(elyW * 0.05, elyW * 0.24, abdoY0 + elyH + 4, abdoY0 + elyH + 14, 5, (0.5 * s).toFixed(2), 0.5));
+
+    // 3. Articulated Segmented Legs (Coxa, Trochanter, Femur, Fossorial Tibia, 5 Tarsomeres, Ungues)
+    var legConfigs = [
+      { name: "Prothoracic", rootY: pronoY - 6, kneeX: 68, kneeY: pronoY - 42, tibX: 102, tibY: pronoY - 72, tarX: 118, tarY: pronoY - 105, isFore: true },
+      { name: "Mesothoracic", rootY: pinY / s + 4, kneeX: 90, kneeY: pinY / s - 12, tibX: 132, tibY: pinY / s + 16, tarX: 154, tarY: pinY / s + 52, isFore: false },
+      { name: "Metathoracic", rootY: abdoY0 + 26, kneeX: 100, kneeY: abdoY0 + 68, tibX: 142, tibY: abdoY0 + 132, tarX: 165, tarY: abdoY0 + 186, isFore: false }
+    ];
+
+    legConfigs.forEach(function (leg) {
+      var rx = pronoW * 0.42;
+
+      var femMidX = (rx + leg.kneeX) * 0.5 + 4;
+      var femMidY = (leg.rootY + leg.kneeY) * 0.5 - 3;
+      var femD_R = "M " + (cx + rx * s).toFixed(2) + " " + (leg.rootY * s).toFixed(2) +
+                   " Q " + (cx + femMidX * s).toFixed(2) + " " + (femMidY * s).toFixed(2) +
+                   " " + (cx + leg.kneeX * s).toFixed(2) + " " + (leg.kneeY * s).toFixed(2);
+      var femD_L = "M " + (cx - rx * s).toFixed(2) + " " + (leg.rootY * s).toFixed(2) +
+                   " Q " + (cx - femMidX * s).toFixed(2) + " " + (femMidY * s).toFixed(2) +
+                   " " + (cx - leg.kneeX * s).toFixed(2) + " " + (leg.kneeY * s).toFixed(2);
+      elements.push('<path d="' + femD_R + ' ' + femD_L + '" fill="none" stroke="' + p.chitin + '" stroke-width="' + (5.6 * s).toFixed(2) + '" stroke-linecap="round" />');
+      elements.push('<path d="' + femD_R + ' ' + femD_L + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (1.2 * s).toFixed(2) + '" stroke-linecap="round" />');
+      elements.push(h.symLine(rx + 8, leg.rootY + 1, leg.kneeX - 6, leg.kneeY + 1, p.ink, (0.6 * s).toFixed(2), 0.55));
+
+      if (leg.isFore) {
+        elements.push(h.symLine(leg.kneeX, leg.kneeY, leg.tibX, leg.tibY, p.ink, (3.8 * s).toFixed(2), 1.0));
+        for (var fti = 1; fti <= 4; fti++) {
+          var ftt = fti / 5;
+          var ftx = leg.kneeX + (leg.tibX - leg.kneeX) * ftt;
+          var fty = leg.kneeY + (leg.tibY - leg.kneeY) * ftt;
+          var toothCoords = [
+            [ftx, fty],
+            [ftx + 8.5, fty - 4.5],
+            [ftx + 2.5, fty + 3.0]
+          ];
+          elements.push(h.symPath(toothCoords, true, p.ink, p.ink, (0.8 * s).toFixed(2), 1.0));
+        }
+        elements.push(h.symLine(leg.tibX, leg.tibY, leg.tibX + 7, leg.tibY + 5, p.ink, (1.2 * s).toFixed(2), 1.0));
+        elements.push(h.symLine(leg.tibX, leg.tibY, leg.tibX + 3, leg.tibY + 8, p.ink, (1.1 * s).toFixed(2), 1.0));
+      } else {
+        elements.push(h.symLine(leg.kneeX, leg.kneeY, leg.tibX, leg.tibY, p.ink, (3.2 * s).toFixed(2), 1.0));
+        elements.push(h.symLine(leg.kneeX + 2, leg.kneeY + 1, leg.tibX - 2, leg.tibY - 1, p.paper, (0.7 * s).toFixed(2), 0.45));
+        for (var si = 1; si <= 4; si++) {
+          var st = si / 5;
+          var sx = leg.kneeX + (leg.tibX - leg.kneeX) * st;
+          var sy = leg.kneeY + (leg.tibY - leg.kneeY) * st;
+          elements.push(h.symLine(sx, sy, sx + 6, sy - 3.5, p.ink, (1.1 * s).toFixed(2), 1.0));
+        }
+        elements.push(h.symLine(leg.tibX, leg.tibY, leg.tibX + 6, leg.tibY + 4, p.ink, (1.2 * s).toFixed(2), 1.0));
+      }
+
+      var curTx = leg.tibX;
+      var curTy = leg.tibY;
+      for (var ti = 1; ti <= 5; ti++) {
+        var nxtTx = leg.tibX + (leg.tarX - leg.tibX) * (ti / 5);
+        var nxtTy = leg.tibY + (leg.tarY - leg.tibY) * (ti / 5);
+        var tStroke = ti === 5 ? (1.3 * s) : (2.2 - ti * 0.22) * s;
+        elements.push(h.symLine(curTx, curTy, nxtTx, nxtTy, p.ink, tStroke.toFixed(2), 1.0));
+        elements.push(h.symCircle(nxtTx, nxtTy, 1.2, p.ink, "none", 0, 0.95));
+        if (ti < 5) {
+          elements.push(h.symLine(nxtTx, nxtTy, nxtTx - 2.5, nxtTy + 3, p.accent, (0.6 * s).toFixed(2), 0.75));
+        }
+        curTx = nxtTx;
+        curTy = nxtTy;
+      }
+
+      elements.push(h.symLine(curTx, curTy, curTx + 7, curTy - 5, p.ink, (1.2 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(curTx, curTy, curTx + 7, curTy + 5, p.ink, (1.2 * s).toFixed(2), 1.0));
+      elements.push(h.symCircle(curTx + 4.5, curTy, 1.4, p.accent, p.ink, (0.5 * s).toFixed(2), 0.9));
+    });
+
+    // 4. Hardened Convex Elytra (Wing Cases)
+    var elyCoords = [
+      [2, abdoY0 + 2],
+      [elyW * 0.45, abdoY0 + 5],
+      [elyW * 0.92, abdoY0 + elyH * 0.22],
+      [elyW * 1.02, abdoY0 + elyH * 0.54],
+      [elyW * 0.9, abdoY0 + elyH * 0.82],
+      [elyW * 0.48, abdoY0 + elyH * 0.98],
+      [2, abdoY0 + elyH]
+    ];
+    elements.push(h.symPath(elyCoords, true, p.chitin, p.ink, (1.5 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(0, abdoY0, 0, abdoY0 + elyH, p.ink, (1.4 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(1.8, abdoY0 + 16, 1.8, abdoY0 + elyH - 4, p.ink, (0.6 * s).toFixed(2), 0.6));
+
+    var humX = elyW * 0.68;
+    var humY = abdoY0 + 22;
+    elements.push(h.symCircle(humX, humY, 8.5, "none", p.ink, (0.65 * s).toFixed(2), 0.55));
+    elements.push(h.symCircle(humX, humY, 5.0, "none", p.ink, (0.65 * s).toFixed(2), 0.6));
+    elements.push(h.symCircle(humX, humY, 2.0, p.chitinLight, "none", 0, 0.8));
+
+    // 9 Longitudinal Costae with Biseriate Punctation
+    for (var strI = 1; strI <= 8; strI++) {
+      var strRatio = strI / 9;
+      var pX1 = elyW * strRatio * 0.46;
+      var pX2 = elyW * strRatio * 0.98;
+      var pX3 = elyW * strRatio * 0.54;
+
+      var dStrR = "M " + (cx + pX1 * s).toFixed(2) + " " + ((abdoY0 + 12) * s).toFixed(2) +
+                  " Q " + (cx + pX2 * s).toFixed(2) + " " + ((abdoY0 + elyH * 0.5) * s).toFixed(2) +
+                  " " + (cx + pX3 * s).toFixed(2) + " " + ((abdoY0 + elyH - 12) * s).toFixed(2);
+      var dStrL = "M " + (cx - pX1 * s).toFixed(2) + " " + ((abdoY0 + 12) * s).toFixed(2) +
+                  " Q " + (cx - pX2 * s).toFixed(2) + " " + ((abdoY0 + elyH * 0.5) * s).toFixed(2) +
+                  " " + (cx - pX3 * s).toFixed(2) + " " + ((abdoY0 + elyH - 12) * s).toFixed(2);
+      elements.push('<path d="' + dStrR + ' ' + dStrL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.75 * s).toFixed(2) + '" stroke-opacity="0.75" />');
+
+      for (var pdi = 1; pdi <= 14; pdi++) {
+        var pdt = pdi / 15;
+        var curPx = pX1 * (1 - pdt) * (1 - pdt) + pX2 * 2 * (1 - pdt) * pdt + pX3 * pdt * pdt;
+        var curPy = (abdoY0 + 12) * (1 - pdt) * (1 - pdt) + (abdoY0 + elyH * 0.5) * 2 * (1 - pdt) * pdt + (abdoY0 + elyH - 12) * pdt * pdt;
+        elements.push(h.symCircle(curPx - 1.8, curPy, 0.55, p.ink, "none", 0, 0.7));
+        elements.push(h.symCircle(curPx + 1.8, curPy + 1.2, 0.55, p.ink, "none", 0, 0.7));
+      }
+    }
+
+    // Lateral Intaglio Curvature Hatching
+    for (var lhi = 0; lhi < 12; lhi++) {
+      var lht = lhi / 11;
+      var ly = abdoY0 + elyH * 0.2 + lht * (elyH * 0.6);
+      var lxOuter = elyW * (0.95 - (lht - 0.5) * (lht - 0.5) * 0.2);
+      var lxInner = lxOuter - 14;
+      elements.push(h.symLine(lxInner, ly, lxOuter, ly + 2, p.ink, (0.55 * s).toFixed(2), 0.45));
+    }
+
+    if (isGoliath) {
+      var gBands = [
+        [[elyW * 0.15, abdoY0 + 20], [elyW * 0.25, abdoY0 + elyH * 0.4], [elyW * 0.2, abdoY0 + elyH * 0.75]],
+        [[elyW * 0.45, abdoY0 + 35], [elyW * 0.62, abdoY0 + elyH * 0.55], [elyW * 0.5, abdoY0 + elyH * 0.85]]
+      ];
+      gBands.forEach(function (gb) {
+        elements.push(h.symPath(gb, false, "none", p.paper, (3.2 * s).toFixed(2), 0.85));
+      });
+    }
+
+    // 5. Scutellum (Heart-shaped inter-elytral shield)
+    var scuCoords = [
+      [0, abdoY0],
+      [15, abdoY0 + 2],
+      [12, abdoY0 + 14],
+      [0, abdoY0 + 22]
+    ];
+    elements.push(h.symPath(scuCoords, true, p.chitinLight, p.ink, (1.2 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(0, abdoY0 + 4, 0, abdoY0 + 19, p.ink, (0.8 * s).toFixed(2), 0.8));
+    elements.push(h.symStipple(5, abdoY0 + 9, 4, 5, 8, 0.5, 0.6));
+
+    // 6. Pronotum (Sculptured Prothoracic Shield)
+    var pronoCoords = [
+      [0, pronoY - pronoH * 0.52],
+      [pronoW * 0.42, pronoY - pronoH * 0.48],
+      [pronoW * 0.88, pronoY - pronoH * 0.3],
+      [pronoW * 1.02, pronoY + pronoH * 0.12],
+      [pronoW * 0.84, pronoY + pronoH * 0.48],
+      [pronoW * 0.35, pronoY + pronoH * 0.52],
+      [0, pronoY + pronoH * 0.54]
+    ];
+    if (isLonghorn) {
+      pronoCoords[3] = [pronoW * 1.18, pronoY - 2];
+    }
+    elements.push(h.symPath(pronoCoords, true, p.chitin, p.ink, (1.4 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(0, pronoY - pronoH * 0.48, 0, pronoY + pronoH * 0.5, p.ink, (1.1 * s).toFixed(2), 0.9));
+    elements.push(h.symCircle(pronoW * 0.38, pronoY - 4, 3.2, p.chitinLight, p.ink, (0.6 * s).toFixed(2), 0.8));
+    elements.push(h.symHatch(pronoW * 0.3, pronoW * 0.88, pronoY - pronoH * 0.28, pronoY + pronoH * 0.28, 9, (0.55 * s).toFixed(2), 0.5));
+    elements.push(h.symStipple(pronoW * 0.45, pronoY, pronoW * 0.35, pronoH * 0.35, 18, 0.55, 0.55));
+
+    // 7. Head Capsule & Clypeus
+    var headCoords = [
+      [0, headY - headH * 0.55],
+      [headW * 0.45, headY - headH * 0.5],
+      [headW * 0.82, headY - headH * 0.15],
+      [headW * 0.78, headY + headH * 0.45],
+      [headW * 0.32, headY + headH * 0.5],
+      [0, headY + headH * 0.52]
+    ];
+    elements.push(h.symPath(headCoords, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(0, headY - headH * 0.45, 0, headY + headH * 0.4, p.ink, (0.9 * s).toFixed(2), 0.85));
+    elements.push(h.symLine(headW * 0.18, headY - headH * 0.15, headW * 0.45, headY + headH * 0.12, p.ink, (0.7 * s).toFixed(2), 0.65));
+    elements.push(h.symStipple(headW * 0.3, headY, headW * 0.25, headH * 0.3, 12, 0.5, 0.6));
+
+    // 4-Segmented Maxillary Palpi
+    elements.push(h.symLine(headW * 0.22, headY - headH * 0.5, headW * 0.38, headY - headH * 0.75, p.ink, (1.0 * s).toFixed(2), 0.95));
+    elements.push(h.symLine(headW * 0.38, headY - headH * 0.75, headW * 0.32, headY - headH * 1.02, p.ink, (0.9 * s).toFixed(2), 0.95));
+    elements.push(h.symCircle(headW * 0.32, headY - headH * 1.02, 1.5, p.accent, p.ink, (0.6 * s).toFixed(2), 0.9));
+
+    // Compound Eyes with Canthus Notch
+    var eyeR = 7.0;
+    var eyeX = headW * 0.76;
+    var eyeY = headY;
+    elements.push(h.symCircle(eyeX, eyeY, eyeR, p.paper, p.ink, (1.1 * s).toFixed(2)));
+    elements.push(h.symLine(eyeX - eyeR - 1, eyeY, eyeX - 0.5, eyeY, p.ink, (1.4 * s).toFixed(2), 1.0));
+    for (var fxi = -3; fxi <= 3; fxi++) {
+      for (var fyi = -3; fyi <= 3; fyi++) {
+        if (fxi * fxi + fyi * fyi <= 6) {
+          elements.push(h.symCircle(eyeX + fxi * 1.7, eyeY + fyi * 1.7, 0.45, p.ink, "none", 0, 0.8));
+        }
+      }
+    }
+
+    // 8. Mandibles & Cephalic Horns
+    if (isStag) {
+      var manLen = 65 + rng() * 30;
+      var mC1 = [
+        [headW * 0.35, headY - headH * 0.42],
+        [headW * 0.62, headY - headH * 0.75],
+        [headW * 0.78, headY - headH * 0.75 - manLen * 0.45],
+        [headW * 0.64, headY - headH * 0.75 - manLen * 0.82],
+        [headW * 0.18, headY - headH * 0.75 - manLen],
+        [headW * 0.32, headY - headH * 0.75 - manLen * 0.88],
+        [headW * 0.44, headY - headH * 0.75 - manLen * 0.65],
+        [headW * 0.46, headY - headH * 0.75 - manLen * 0.42],
+        [headW * 0.24, headY - headH * 0.75 - manLen * 0.22],
+        [headW * 0.18, headY - headH * 0.42]
+      ];
+      elements.push(h.symPath(mC1, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
+
+      var antCarR = "M " + (cx + headW * 0.45 * s).toFixed(2) + " " + ((headY - headH * 0.55) * s).toFixed(2) +
+                    " Q " + (cx + headW * 0.65 * s).toFixed(2) + " " + ((headY - headH * 0.75 - manLen * 0.5) * s).toFixed(2) +
+                    " " + (cx + headW * 0.26 * s).toFixed(2) + " " + ((headY - headH * 0.75 - manLen * 0.92) * s).toFixed(2);
+      var antCarL = "M " + (cx - headW * 0.45 * s).toFixed(2) + " " + ((headY - headH * 0.55) * s).toFixed(2) +
+                    " Q " + (cx - headW * 0.65 * s).toFixed(2) + " " + ((headY - headH * 0.75 - manLen * 0.5) * s).toFixed(2) +
+                    " " + (cx - headW * 0.26 * s).toFixed(2) + " " + ((headY - headH * 0.75 - manLen * 0.92) * s).toFixed(2);
+      elements.push('<path d="' + antCarR + ' ' + antCarL + '" fill="none" stroke="' + p.paper + '" stroke-width="' + (0.7 * s).toFixed(2) + '" stroke-opacity="0.4" />');
+
+      for (var mi = 1; mi <= 7; mi++) {
+        var mt = mi / 8;
+        var tX = (headW * 0.48 - mt * (headW * 0.28));
+        var tY = (headY - headH * 0.75 - manLen * mt);
+        elements.push(h.symLine(tX, tY, tX - 5.5, tY + 2.5, p.ink, (1.0 * s).toFixed(2), 0.95));
+      }
+      for (var bsi = 0; bsi < 5; bsi++) {
+        elements.push(h.symLine(headW * 0.24, headY - headH * 0.45, headW * 0.28 + bsi * 2, headY - headH * 0.55 - bsi * 1.5, p.accent, (0.7 * s).toFixed(2), 0.85));
+      }
+    } else if (isHornedDynastes) {
+      var hLen = 75 + rng() * 35;
+      var chCoords = [
+        [headW * 0.18, headY - headH * 0.4],
+        [headW * 0.24, headY - headH * 0.85],
+        [headW * 0.16, headY - headH * 0.85 - hLen * 0.65],
+        [0, headY - headH * 0.85 - hLen],
+        [headW * 0.08, headY - headH * 0.85 - hLen * 0.6],
+        [headW * 0.1, headY - headH * 0.4]
+      ];
+      elements.push(h.symPath(chCoords, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(headW * 0.18, headY - headH * 0.85 - hLen * 0.35, headW * 0.28, headY - headH * 0.85 - hLen * 0.38, p.ink, (1.2 * s).toFixed(2), 1.0));
+
+      var prHCoords = [
+        [headW * 0.18, pronoY - pronoH * 0.3],
+        [headW * 0.22, pronoY - pronoH * 0.75],
+        [headW * 0.15, headY - headH * 0.85 - hLen * 0.98],
+        [0, headY - headH * 0.85 - hLen * 1.22],
+        [headW * 0.05, headY - headH * 0.85 - hLen * 0.9],
+        [headW * 0.1, pronoY - pronoH * 0.3]
+      ];
+      elements.push(h.symPath(prHCoords, true, p.chitinLight, p.ink, (1.4 * s).toFixed(2), 1.0));
+      for (var vsi = 1; vsi <= 24; vsi++) {
+        var vt = vsi / 25;
+        var vy = (pronoY - pronoH * 0.65) - vt * (hLen * 0.92);
+        var vx = headW * 0.07;
+        elements.push(h.symLine(vx, vy, vx + 4.5, vy + 2.5, p.accent, (0.8 * s).toFixed(2), 0.9));
+      }
+    } else if (isHornedAtlas) {
+      var aLen = 70 + rng() * 25;
+      var cAtlas = [
+        [headW * 0.16, headY - headH * 0.4],
+        [headW * 0.2, headY - headH * 0.8],
+        [headW * 0.12, headY - headH * 0.8 - aLen * 0.75],
+        [0, headY - headH * 0.8 - aLen * 1.05],
+        [headW * 0.06, headY - headH * 0.8 - aLen * 0.7],
+        [headW * 0.08, headY - headH * 0.4]
+      ];
+      elements.push(h.symPath(cAtlas, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
+
+      var pLatHorn = [
+        [pronoW * 0.45, pronoY - pronoH * 0.4],
+        [pronoW * 0.62, pronoY - pronoH * 0.75],
+        [pronoW * 0.55, headY - aLen * 0.65],
+        [pronoW * 0.32, headY - aLen * 0.92],
+        [pronoW * 0.42, headY - aLen * 0.6],
+        [pronoW * 0.38, pronoY - pronoH * 0.4]
+      ];
+      elements.push(h.symPath(pLatHorn, true, p.chitinLight, p.ink, (1.3 * s).toFixed(2), 1.0));
+    } else {
+      var manCoords = [
+        [headW * 0.22, headY - headH * 0.52],
+        [headW * 0.36, headY - headH * 0.88],
+        [headW * 0.06, headY - headH * 1.15],
+        [headW * 0.16, headY - headH * 0.78],
+        [headW * 0.1, headY - headH * 0.52]
+      ];
+      elements.push(h.symPath(manCoords, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(headW * 0.22, headY - headH * 0.7, headW * 0.12, headY - headH * 0.74, p.ink, (1.0 * s).toFixed(2), 0.95));
+      elements.push(h.symLine(headW * 0.18, headY - headH * 0.88, headW * 0.08, headY - headH * 0.92, p.ink, (1.0 * s).toFixed(2), 0.95));
+    }
+
+    // 9. Antennae
+    var antBaseX = headW * 0.55;
+    var antBaseY = headY - headH * 0.12;
+    if (isLonghorn) {
+      var antPts = [
+        [antBaseX, antBaseY],
+        [antBaseX + 38, antBaseY - 32],
+        [antBaseX + 82, antBaseY - 52],
+        [antBaseX + 128, antBaseY - 32],
+        [antBaseX + 152, antBaseY + 28],
+        [antBaseX + 158, antBaseY + 98],
+        [antBaseX + 148, antBaseY + 165]
+      ];
+      var dR = "M " + (cx + antPts[0][0] * s).toFixed(2) + " " + (antPts[0][1] * s).toFixed(2);
+      var dL = "M " + (cx - antPts[0][0] * s).toFixed(2) + " " + (antPts[0][1] * s).toFixed(2);
+      for (var api = 1; api < antPts.length; api++) {
+        dR += " L " + (cx + antPts[api][0] * s).toFixed(2) + " " + (antPts[api][1] * s).toFixed(2);
+        dL += " L " + (cx - antPts[api][0] * s).toFixed(2) + " " + (antPts[api][1] * s).toFixed(2);
+        elements.push(h.symCircle(antPts[api][0], antPts[api][1], 1.8, p.chitin, p.ink, (0.8 * s).toFixed(2)));
+        elements.push(h.symLine(antPts[api][0], antPts[api][1], antPts[api][0] + 3.5, antPts[api][1] - 3.0, p.accent, (0.7 * s).toFixed(2), 0.85));
+      }
+      elements.push('<path d="' + dR + ' ' + dL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (1.3 * s).toFixed(2) + '" stroke-linecap="round" />');
+    } else {
+      var antMidX = antBaseX + 24;
+      var antMidY = antBaseY - 35;
+      var antTipX = antBaseX + 42;
+      var antTipY = antBaseY - 58;
+      elements.push(h.symLine(antBaseX, antBaseY, antMidX, antMidY, p.ink, (1.3 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(antMidX, antMidY, antTipX, antTipY, p.ink, (1.2 * s).toFixed(2), 1.0));
+      for (var li = 0; li < 6; li++) {
+        var lx = antTipX + li * 5.2;
+        var ly = antTipY - li * 2.8;
+        elements.push(h.symLine(antTipX, antTipY, lx + 18, ly - 9, p.ink, (1.1 * s).toFixed(2), 0.95));
+        elements.push(h.symLine(lx + 18, ly - 9, lx + 20, ly - 11, p.accent, (0.6 * s).toFixed(2), 0.8));
+      }
+    }
+
+    return elements;
+  }
+
+  // ORDER 2: LEPIDOPTERA (Butterflies & Moths - Papilionidae, Saturniidae, Nymphalidae)
+  function drawLepidoptera(specimen, p, cx, cy, pinY, s, rng, h) {
+    var elements = [];
+    var taxon = specimen.taxon;
+    var morph = taxon.morphology;
+    var isTailedPapilio = morph === 'tailed_papilio';
+    var isTailedLuna = morph === 'tailed_luna';
+    var isFalcate = morph === 'falcate_saturniid' || morph === 'falcate_birdwing' || morph === 'falcate_leaf';
+
+    var bL = specimen.bodyLength / s;
+    var wingspanHalf = (specimen.wingspan * 0.5) / s;
+
+    var thoraxW = 20 + rng() * 6;
+    var thoraxH = 38 + rng() * 6;
+    var thoraxY = pinY / s;
+
+    var headW = 16 + rng() * 4;
+    var headH = 14 + rng() * 3;
+    var headY = thoraxY - thoraxH * 0.5 - headH * 0.5;
+
+    var abdoW = 18 + rng() * 4;
+    var abdoH = bL * 0.52;
+    var abdoY0 = thoraxY + thoraxH * 0.5;
+
+    var fwSpan = wingspanHalf * 0.96;
+    var fwH = fwSpan * 0.70;
+    var fwRootY = thoraxY - 10;
+
+    var apexX = fwSpan;
+    var apexY = fwRootY - fwH * 0.72;
+    var tornusX = fwSpan * 0.68;
+    var tornusY = fwRootY + fwH * 0.44;
+
+    var fwCoords = [
+      [thoraxW * 0.4, fwRootY],
+      [fwSpan * 0.48, fwRootY - fwH * 0.64],
+      [apexX, apexY]
+    ];
+
+    for (var si = 1; si <= 6; si++) {
+      var st = si / 7;
+      var baseMx = apexX + (tornusX - apexX) * st;
+      var baseMy = apexY + (tornusY - apexY) * st;
+      var scallopIndent = (si % 2 === 0 ? 3.5 : -1.5);
+      fwCoords.push([baseMx - scallopIndent, baseMy]);
+    }
+    fwCoords.push([tornusX, tornusY]);
+    fwCoords.push([fwSpan * 0.35, tornusY + 4]);
+    fwCoords.push([thoraxW * 0.4, fwRootY + 12]);
+
+    elements.push(h.symPath(fwCoords, true, p.wingTint, p.ink, (1.4 * s).toFixed(2), 0.98));
+
+    for (var cii = 1; cii <= 18; cii++) {
+      var cit = cii / 19;
+      var cx1 = apexX + (tornusX - apexX) * cit;
+      var cy1 = apexY + (tornusY - apexY) * cit;
+      var color = (cii % 2 === 0 ? p.ink : p.paper);
+      elements.push(h.symLine(cx1, cy1, cx1 + 2.5, cy1 + 1.2, color, (0.75 * s).toFixed(2), 0.85));
+    }
+
+    var hwSpan = fwSpan * 0.70;
+    var hwH = fwH * 0.84;
+    var hwRootY = thoraxY + 8;
+
+    var hwCoords = [
+      [thoraxW * 0.35, hwRootY],
+      [hwSpan * 0.72, hwRootY + hwH * 0.25],
+      [hwSpan * 0.96, hwRootY + hwH * 0.65],
+      [hwSpan * 0.84, hwRootY + hwH * 0.95]
+    ];
+
+    if (isTailedPapilio) {
+      var tailLen = 45 + rng() * 20;
+      hwCoords.push([hwSpan * 0.76, hwRootY + hwH * 1.05 + tailLen * 0.5]);
+      hwCoords.push([hwSpan * 0.74, hwRootY + hwH * 1.05 + tailLen]);
+      hwCoords.push([hwSpan * 0.65, hwRootY + hwH * 1.05 + tailLen * 0.7]);
+      hwCoords.push([hwSpan * 0.56, hwRootY + hwH * 1.02]);
+    } else if (isTailedLuna) {
+      var lunaLen = 85 + rng() * 30;
+      hwCoords.push([hwSpan * 0.75, hwRootY + hwH * 1.05 + lunaLen * 0.4]);
+      hwCoords.push([hwSpan * 0.68, hwRootY + hwH * 1.05 + lunaLen * 0.75]);
+      hwCoords.push([hwSpan * 0.58, hwRootY + hwH * 1.05 + lunaLen]);
+      hwCoords.push([hwSpan * 0.52, hwRootY + hwH * 1.05 + lunaLen * 0.8]);
+      hwCoords.push([hwSpan * 0.55, hwRootY + hwH * 1.02]);
+    } else {
+      hwCoords.push([hwSpan * 0.68, hwRootY + hwH * 1.06]);
+      hwCoords.push([hwSpan * 0.52, hwRootY + hwH * 1.08]);
+    }
+
+    hwCoords.push([hwSpan * 0.25, hwRootY + hwH * 0.96]);
+    hwCoords.push([thoraxW * 0.35, hwRootY + hwH * 0.65]);
+    elements.push(h.symPath(hwCoords, true, p.wingTint, p.ink, (1.3 * s).toFixed(2), 0.98));
+
+    var dcW = fwSpan * 0.40;
+    var dcH = fwH * 0.28;
+    var dcCoords = [
+      [thoraxW * 0.45, fwRootY],
+      [dcW * 0.72, fwRootY - dcH * 0.75],
+      [dcW, fwRootY - dcH * 0.12],
+      [dcW * 0.84, fwRootY + dcH * 0.58],
+      [thoraxW * 0.45, fwRootY + 8]
+    ];
+    elements.push(h.symPath(dcCoords, true, "none", p.ink, (1.2 * s).toFixed(2), 0.95));
+
+    var radTargets = [
+      [fwSpan * 0.68, fwRootY - fwH * 0.7],
+      [fwSpan * 0.85, fwRootY - fwH * 0.62],
+      [apexX - 2, apexY + 2],
+      [fwSpan * 0.96, fwRootY - fwH * 0.16],
+      [fwSpan * 0.88, fwRootY + fwH * 0.06],
+      [tornusX, tornusY]
+    ];
+    radTargets.forEach(function (tgt) {
+      var dR = "M " + (cx + dcW * s).toFixed(2) + " " + ((fwRootY - dcH * 0.12) * s).toFixed(2) +
+               " Q " + (cx + (tgt[0] * 0.7) * s).toFixed(2) + " " + ((tgt[1] * 0.85 + fwRootY * 0.15) * s).toFixed(2) +
+               " " + (cx + tgt[0] * s).toFixed(2) + " " + (tgt[1] * s).toFixed(2);
+      var dL = "M " + (cx - dcW * s).toFixed(2) + " " + ((fwRootY - dcH * 0.12) * s).toFixed(2) +
+               " Q " + (cx - (tgt[0] * 0.7) * s).toFixed(2) + " " + ((tgt[1] * 0.85 + fwRootY * 0.15) * s).toFixed(2) +
+               " " + (cx - tgt[0] * s).toFixed(2) + " " + (tgt[1] * s).toFixed(2);
+      elements.push('<path d="' + dR + ' ' + dL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.85 * s).toFixed(2) + '" stroke-opacity="0.9" />');
+    });
+
+    var hwTargets = [
+      [hwSpan * 0.76, hwRootY + hwH * 0.28],
+      [hwSpan * 0.94, hwRootY + hwH * 0.65],
+      [hwSpan * 0.82, hwRootY + hwH * 0.94],
+      [hwSpan * 0.62, hwRootY + hwH * 1.05],
+      [hwSpan * 0.38, hwRootY + hwH * 1.02]
+    ];
+    hwTargets.forEach(function (htgt) {
+      elements.push(h.symLine(thoraxW * 0.35, hwRootY + 14, htgt[0], htgt[1], p.ink, (0.8 * s).toFixed(2), 0.85));
+    });
+
+    for (var fbi = 0; fbi < 8; fbi++) {
+      var fbt = fbi / 7;
+      var bx1 = dcW * 1.05 + (apexX * 0.85 - dcW * 1.05) * fbt;
+      var by1 = (fwRootY - dcH * 0.5) + (tornusY - (fwRootY - dcH * 0.5)) * fbt;
+      elements.push(h.symCircle(bx1, by1, 2.2, p.accent, "none", 0, 0.85));
+      if (fbi > 0) {
+        var prevBx = dcW * 1.05 + (apexX * 0.85 - dcW * 1.05) * ((fbi - 1) / 7);
+        var prevBy = (fwRootY - dcH * 0.5) + (tornusY - (fwRootY - dcH * 0.5)) * ((fbi - 1) / 7);
+        elements.push(h.symLine(prevBx, prevBy, bx1, by1, p.accent, (0.8 * s).toFixed(2), 0.75, "2,2"));
+      }
+    }
+
+    for (var lui = 1; lui <= 7; lui++) {
+      var lut = lui / 8;
+      var lx = apexX + (tornusX - apexX) * lut;
+      var ly = apexY + (tornusY - apexY) * lut;
+      elements.push(h.symCircle(lx - 9, ly - 3, 3.6, "none", p.accent, (0.9 * s).toFixed(2), 0.9));
+      elements.push(h.symCircle(lx - 9, ly - 3, 1.8, p.paper, "none", 0, 0.85));
+    }
+
+    var ocX1 = fwSpan * 0.76;
+    var ocY1 = fwRootY - fwH * 0.08;
+    var ocR1 = 12.0;
+    elements.push(h.symCircle(ocX1, ocY1, ocR1, p.paper, p.ink, (1.3 * s).toFixed(2)));
+    elements.push(h.symCircle(ocX1, ocY1, ocR1 * 0.78, p.accent, p.ink, (0.85 * s).toFixed(2), 0.9));
+    elements.push(h.symCircle(ocX1, ocY1, ocR1 * 0.44, p.ink, "none", 0, 1.0));
+    elements.push(h.symCircle(ocX1 - 2.8, ocY1 - 2.8, 1.6, p.paper, "none", 0, 0.98));
+
+    var ocX2 = hwSpan * 0.66;
+    var ocY2 = hwRootY + hwH * 0.64;
+    var ocR2 = 9.5;
+    elements.push(h.symCircle(ocX2, ocY2, ocR2, p.paper, p.ink, (1.2 * s).toFixed(2)));
+    elements.push(h.symCircle(ocX2, ocY2, ocR2 * 0.72, p.accent, p.ink, (0.75 * s).toFixed(2), 0.9));
+    elements.push(h.symCircle(ocX2, ocY2, ocR2 * 0.38, p.ink, "none", 0, 1.0));
+    elements.push(h.symCircle(ocX2 - 2.0, ocY2 - 2.0, 1.3, p.paper, "none", 0, 0.95));
+
+    if (isFalcate) {
+      var fenCoords = [
+        [dcW * 0.7, fwRootY - dcH * 0.1],
+        [dcW * 0.88, fwRootY - dcH * 0.25],
+        [dcW * 0.82, fwRootY + dcH * 0.15]
+      ];
+      elements.push(h.symPath(fenCoords, true, p.paper, p.ink, (1.1 * s).toFixed(2), 1.0, 0.85));
+    }
+
+    elements.push(h.symStipple(fwSpan * 0.7, fwRootY - fwH * 0.2, fwSpan * 0.2, fwH * 0.3, 35, 0.5, 0.5));
+
+    var thCoords = [
+      [0, thoraxY - thoraxH * 0.5],
+      [thoraxW * 0.75, thoraxY - thoraxH * 0.35],
+      [thoraxW * 1.05, thoraxY],
+      [thoraxW * 0.88, thoraxY + thoraxH * 0.4],
+      [0, thoraxY + thoraxH * 0.5]
+    ];
+    elements.push(h.symPath(thCoords, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
+
+    for (var thi = -5; thi <= 5; thi++) {
+      var ty = thoraxY + thi * 3.5;
+      elements.push(h.symLine(thoraxW * 0.25, ty, thoraxW * 1.15, ty + 2.5, p.accent, (0.7 * s).toFixed(2), 0.75));
+      elements.push(h.symLine(thoraxW * 0.35, ty, thoraxW * 0.95, ty + 1.5, p.paper, (0.5 * s).toFixed(2), 0.4));
+    }
+
+    for (var asi = 0; asi < 8; asi++) {
+      var ast = asi / 8;
+      var curAY = abdoY0 + ast * abdoH;
+      var segH = (abdoH / 8) * 0.94;
+      var segW = (abdoW - ast * (abdoW * 0.52));
+      var abCoords = [
+        [0, curAY],
+        [segW * 0.82, curAY + 2],
+        [segW, curAY + segH * 0.5],
+        [segW * 0.78, curAY + segH],
+        [0, curAY + segH]
+      ];
+      elements.push(h.symPath(abCoords, true, p.chitin, p.ink, (0.95 * s).toFixed(2), 0.98));
+      elements.push(h.symLine(segW * 0.2, curAY + segH * 0.5, segW * 0.75, curAY + segH * 0.5, p.ink, (0.55 * s).toFixed(2), 0.45));
+      elements.push(h.symCircle(segW * 0.85, curAY + segH * 0.5, 0.7, p.accent, "none", 0, 0.9));
+    }
+
+    var hdCoords = [
+      [0, headY - headH * 0.52],
+      [headW * 0.65, headY - headH * 0.32],
+      [headW * 0.88, headY + headH * 0.12],
+      [headW * 0.52, headY + headH * 0.5],
+      [0, headY + headH * 0.5]
+    ];
+    elements.push(h.symPath(hdCoords, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
+
+    var eyeR = 5.5;
+    var eyeX = headW * 0.72;
+    var eyeY = headY;
+    elements.push(h.symCircle(eyeX, eyeY, eyeR, p.paper, p.ink, (1.1 * s).toFixed(2)));
+    elements.push(h.symCircle(eyeX, eyeY, eyeR * 0.55, p.accent, "none", 0, 0.85));
+    elements.push(h.symCircle(eyeX, eyeY, 1.8, p.ink, "none", 0, 1.0));
+
+    var probR = 9.5;
+    var py0 = headY - headH * 0.48;
+    elements.push('<path d="M ' + cx.toFixed(2) + ' ' + (py0 * s).toFixed(2) +
+                  ' C ' + (cx + probR * s).toFixed(2) + ' ' + ((py0 - probR * 0.6) * s).toFixed(2) +
+                  ', ' + (cx - probR * s).toFixed(2) + ' ' + ((py0 - probR * 1.8) * s).toFixed(2) +
+                  ', ' + cx.toFixed(2) + ' ' + ((py0 - probR * 2.6) * s).toFixed(2) +
+                  ' C ' + (cx + probR * 0.6 * s).toFixed(2) + ' ' + ((py0 - probR * 2.1) * s).toFixed(2) +
+                  ', ' + (cx - probR * 0.4 * s).toFixed(2) + ' ' + ((py0 - probR * 1.2) * s).toFixed(2) +
+                  ', ' + cx.toFixed(2) + ' ' + ((py0 - probR * 1.6) * s).toFixed(2) + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (1.2 * s).toFixed(2) + '" />');
+
+    elements.push(h.symLine(headW * 0.25, headY - headH * 0.4, headW * 0.42, headY - headH * 0.8, p.ink, (1.2 * s).toFixed(2), 0.95));
+    elements.push(h.symCircle(headW * 0.42, headY - headH * 0.8, 1.5, p.accent, p.ink, (0.6 * s).toFixed(2), 0.9));
+
+    var antBaseX = headW * 0.42;
+    var antBaseY = headY - headH * 0.32;
+    var antTipX = antBaseX + 58;
+    var antTipY = antBaseY - 68;
+
+    if (isFalcate || isTailedLuna) {
+      elements.push(h.symLine(antBaseX, antBaseY, antTipX, antTipY, p.ink, (1.3 * s).toFixed(2), 1.0));
+      for (var fbi = 1; fbi <= 26; fbi++) {
+        var fbt = fbi / 27;
+        var fpx = antBaseX + (antTipX - antBaseX) * fbt;
+        var fpy = antBaseY + (antTipY - antBaseY) * fbt;
+        var featherLen = Math.sin(fbt * Math.PI) * 18.0;
+        elements.push(h.symLine(fpx, fpy, fpx + featherLen, fpy - 4.0, p.ink, (0.8 * s).toFixed(2), 0.95));
+        elements.push(h.symLine(fpx, fpy, fpx - featherLen * 0.65, fpy - 3.0, p.ink, (0.7 * s).toFixed(2), 0.85));
+        elements.push(h.symLine(fpx + featherLen, fpy - 4.0, fpx + featherLen + 2.0, fpy - 5.5, p.accent, (0.5 * s).toFixed(2), 0.75));
+      }
+    } else {
+      elements.push(h.symLine(antBaseX, antBaseY, antTipX - 6, antTipY + 8, p.ink, (1.1 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(antTipX - 6, antTipY + 8, antTipX, antTipY, p.ink, (2.8 * s).toFixed(2), 1.0));
+      elements.push(h.symCircle(antTipX, antTipY, 2.2, p.accent, p.ink, (0.8 * s).toFixed(2), 0.95));
+    }
+
+    var legYs = [thoraxY - 8, thoraxY + 4, thoraxY + 16];
+    legYs.forEach(function (ly, lidx) {
+      elements.push(h.symLine(thoraxW * 0.4, ly, thoraxW * 0.4 + 26 + lidx * 8, ly + 22, p.ink, (1.0 * s).toFixed(2), 0.85));
+      elements.push(h.symLine(thoraxW * 0.4 + 26 + lidx * 8, ly + 22, thoraxW * 0.4 + 45 + lidx * 12, ly + 48, p.ink, (0.85 * s).toFixed(2), 0.85));
+    });
+
+    return elements;
+  }
+
+  // ORDER 3: ODONATA (Dragonflies - Aeshnidae, Libellulidae, Calopterygidae)
+  function drawOdonata(specimen, p, cx, cy, pinY, s, rng, h) {
+    var elements = [];
+
+    var bL = specimen.bodyLength / s;
+    var wingspanHalf = (specimen.wingspan * 0.5) / s;
+
+    var thoraxW = 22 + rng() * 6;
+    var thoraxH = 40 + rng() * 6;
+    var thoraxY = pinY / s;
+
+    var headW = 36 + rng() * 6;
+    var headH = 18 + rng() * 4;
+    var headY = thoraxY - thoraxH * 0.5 - headH * 0.4;
+
+    var abdoW = 11 + rng() * 3;
+    var abdoH = bL * 0.66;
+    var abdoY0 = thoraxY + thoraxH * 0.5;
+
+    var wingPairs = [
+      { name: "Forewing", rootY: thoraxY - 14, span: wingspanHalf * 0.98, chord: wingspanHalf * 0.22, tilt: -10, isHind: false },
+      { name: "Hindwing", rootY: thoraxY + 10, span: wingspanHalf * 0.94, chord: wingspanHalf * 0.27, tilt: 6, isHind: true }
+    ];
+
+    wingPairs.forEach(function (wp) {
+      var wY = wp.rootY;
+      var span = wp.span;
+      var chord = wp.chord;
+      var tipX = span;
+      var tipY = wY + wp.tilt;
+      var nodusX = span * 0.50;
+      var nodusY = wY - chord * 0.42 + wp.tilt * 0.50;
+
+      var wCoords = [
+        [thoraxW * 0.35, wY],
+        [nodusX * 0.85, wY - chord * 0.45 + wp.tilt * 0.42],
+        [nodusX, nodusY + 2.5],
+        [nodusX * 1.08, nodusY - 2.5],
+        [tipX * 0.86, wY - chord * 0.38 + wp.tilt * 0.86],
+        [tipX, tipY],
+        [tipX * 0.94, wY + chord * 0.32 + wp.tilt * 0.94],
+        [span * 0.65, wY + chord * 0.52 + wp.tilt * 0.65],
+        [span * 0.28, wY + chord * 0.48 + wp.tilt * 0.28]
+      ];
+      if (wp.isHind) {
+        wCoords.push([span * 0.16, wY + chord * 0.58]);
+        wCoords.push([thoraxW * 0.35, wY + chord * 0.35]);
+      } else {
+        wCoords.push([thoraxW * 0.35, wY + 6]);
+      }
+
+      elements.push(h.symPath(wCoords, true, p.wingTint, p.ink, (1.35 * s).toFixed(2), 0.98));
+      elements.push(h.symLine(thoraxW * 0.35, wY, tipX, tipY, p.ink, (1.2 * s).toFixed(2), 1.0));
+
+      var ptX = span * 0.82;
+      var ptY = wY - chord * 0.32 + wp.tilt * 0.82;
+      var ptW = 18.0;
+      var ptH = 4.5;
+      elements.push('<rect x="' + (cx + ptX * s).toFixed(2) + '" y="' + (ptY * s).toFixed(2) + '" width="' + (ptW * s).toFixed(2) + '" height="' + (ptH * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (1.0 * s).toFixed(2) + '" />\n' +
+                    '<rect x="' + (cx - (ptX + ptW) * s).toFixed(2) + '" y="' + (ptY * s).toFixed(2) + '" width="' + (ptW * s).toFixed(2) + '" height="' + (ptH * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (1.0 * s).toFixed(2) + '" />');
+      elements.push(h.symLine(ptX, ptY + ptH, ptX - 4, ptY + ptH + 5, p.ink, (1.1 * s).toFixed(2), 1.0));
+      for (var pti = 1; pti <= 5; pti++) {
+        elements.push(h.symLine(ptX + pti * 3.0, ptY, ptX + pti * 3.0 - 2, ptY + ptH, p.paper, (0.55 * s).toFixed(2), 0.7));
+      }
+
+      for (var vi = 1; vi <= 6; vi++) {
+        var vt = (vi - 3.5) / 3.0;
+        var vyOff = vt * (chord * 0.34);
+        var endX = (vi === 1 ? nodusX : (tipX - 4));
+        var endY = (vi === 1 ? nodusY : (tipY + vyOff * 0.25));
+
+        var vD_R = "M " + (cx + thoraxW * 0.35 * s).toFixed(2) + " " + (wY * s).toFixed(2) +
+                   " Q " + (cx + span * 0.5 * s).toFixed(2) + " " + ((wY + vyOff + wp.tilt * 0.5) * s).toFixed(2) +
+                   " " + (cx + endX * s).toFixed(2) + " " + (endY * s).toFixed(2);
+        var vD_L = "M " + (cx - thoraxW * 0.35 * s).toFixed(2) + " " + (wY * s).toFixed(2) +
+                   " Q " + (cx - span * 0.5 * s).toFixed(2) + " " + ((wY + vyOff + wp.tilt * 0.5) * s).toFixed(2) +
+                   " " + (cx - endX * s).toFixed(2) + " " + (endY * s).toFixed(2);
+        elements.push('<path d="' + vD_R + ' ' + vD_L + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.85 * s).toFixed(2) + '" stroke-opacity="0.9" />');
+      }
+
+      var arcX = thoraxW * 0.35 + span * 0.12;
+      elements.push(h.symLine(arcX, wY - 2, arcX + 2, wY + chord * 0.28, p.ink, (1.2 * s).toFixed(2), 1.0));
+
+      var triCoords = [
+        [arcX + 4, wY + 2],
+        [arcX + 18, wY + chord * 0.24],
+        [arcX + 8, wY + chord * 0.38]
+      ];
+      elements.push(h.symPath(triCoords, true, "none", p.ink, (1.1 * s).toFixed(2), 1.0));
+
+      for (var ani = 1; ani <= 8; ani++) {
+        var ant = ani / 9;
+        var anx = thoraxW * 0.4 + (nodusX - thoraxW * 0.4) * ant;
+        elements.push(h.symLine(anx, wY - chord * 0.42 + wp.tilt * 0.4 * ant, anx, wY - chord * 0.15 + wp.tilt * 0.4 * ant, p.ink, (0.75 * s).toFixed(2), 0.85));
+      }
+
+      for (var pni = 1; pni <= 14; pni++) {
+        var pnt = pni / 15;
+        var pnx = nodusX + (ptX - nodusX) * pnt;
+        elements.push(h.symLine(pnx, nodusY - chord * 0.1 + wp.tilt * 0.4 * pnt, pnx, nodusY + chord * 0.15 + wp.tilt * 0.4 * pnt, p.ink, (0.65 * s).toFixed(2), 0.75));
+      }
+
+      for (var cvi = 1; cvi <= 48; cvi++) {
+        var cvt = cvi / 49;
+        var cvx = thoraxW * 0.4 + span * 0.58 * cvt;
+        var cvyTop = wY - chord * 0.35 + wp.tilt * cvt;
+        var cvyBot = wY + chord * 0.42 + wp.tilt * cvt;
+        var slant = (cvi % 2 === 0 ? 3.0 : -3.0);
+        elements.push(h.symLine(cvx, cvyTop, cvx + slant, cvyBot, p.ink, (0.45 * s).toFixed(2), 0.55));
+      }
+    });
+
+    var eyeR = 13.0;
+    var eyeX = headW * 0.48;
+    var eyeY = headY;
+    elements.push(h.symCircle(eyeX, eyeY, eyeR, p.paper, p.ink, (1.3 * s).toFixed(2)));
+    for (var oxi = -4; oxi <= 4; oxi++) {
+      for (var oyi = -4; oyi <= 4; oyi++) {
+        if (oxi * oxi + oyi * oyi <= 12) {
+          elements.push(h.symCircle(eyeX + oxi * 2.4, eyeY + oyi * 2.4, 0.65, p.ink, "none", 0, 0.75));
+        }
+      }
+    }
+    elements.push(h.symLine(0, eyeY - eyeR * 0.9, 0, eyeY + eyeR * 0.9, p.ink, (1.3 * s).toFixed(2), 0.95));
+
+    elements.push('<circle cx="' + cx.toFixed(2) + '" cy="' + ((eyeY - 8) * s).toFixed(2) + '" r="' + (1.8 * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (0.7 * s).toFixed(2) + '" />');
+    elements.push(h.symCircle(5.0, eyeY - 4, 1.5, p.accent, p.ink, (0.7 * s).toFixed(2)));
+
+    elements.push(h.symLine(headW * 0.15, eyeY + eyeR * 0.5, headW * 0.35, eyeY + eyeR * 0.8, p.ink, (1.0 * s).toFixed(2), 0.9));
+    elements.push(h.symLine(6.5, eyeY - 9, 12.0, eyeY - 20, p.ink, (0.95 * s).toFixed(2), 0.95));
+
+    var thxCoords = [
+      [0, thoraxY - thoraxH * 0.5],
+      [thoraxW * 0.58, thoraxY - thoraxH * 0.45],
+      [thoraxW * 0.98, thoraxY - thoraxH * 0.1],
+      [thoraxW * 1.02, thoraxY + thoraxH * 0.35],
+      [thoraxW * 0.42, thoraxY + thoraxH * 0.5],
+      [0, thoraxY + thoraxH * 0.52]
+    ];
+    elements.push(h.symPath(thxCoords, true, p.chitin, p.ink, (1.4 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(thoraxW * 0.28, thoraxY - thoraxH * 0.38, thoraxW * 0.68, thoraxY + thoraxH * 0.32, p.accent, (2.2 * s).toFixed(2), 0.9));
+    elements.push(h.symLine(thoraxW * 0.48, thoraxY - thoraxH * 0.32, thoraxW * 0.88, thoraxY + thoraxH * 0.26, p.ink, (1.0 * s).toFixed(2), 0.85));
+    elements.push(h.symCircle(thoraxW * 0.85, thoraxY - 12, 2.5, p.accent, p.ink, (0.7 * s).toFixed(2), 0.9));
+    elements.push(h.symCircle(thoraxW * 0.88, thoraxY + 10, 2.5, p.accent, p.ink, (0.7 * s).toFixed(2), 0.9));
+
+    var odLegs = [
+      { rY: thoraxY - 12, kX: 45, kY: thoraxY - 38, tX: 70, tY: thoraxY - 60 },
+      { rY: thoraxY + 2, kX: 55, kY: thoraxY + 16, tX: 88, tY: thoraxY + 48 },
+      { rY: thoraxY + 18, kX: 62, kY: thoraxY + 58, tX: 102, tY: thoraxY + 100 }
+    ];
+    odLegs.forEach(function (ol) {
+      elements.push(h.symLine(thoraxW * 0.4, ol.rY, ol.kX, ol.kY, p.ink, (2.8 * s).toFixed(2), 1.0));
+      elements.push(h.symLine(ol.kX, ol.kY, ol.tX, ol.tY, p.ink, (2.0 * s).toFixed(2), 1.0));
+      for (var psi = 1; psi <= 5; psi++) {
+        var pst = psi / 6;
+        var px = ol.kX + (ol.tX - ol.kX) * pst;
+        var py = ol.kY + (ol.tY - ol.kY) * pst;
+        elements.push(h.symLine(px, py, px + 6.0, py - 3.5, p.ink, (1.1 * s).toFixed(2), 1.0));
+        elements.push(h.symLine(px, py, px - 3.5, py + 4.5, p.ink, (1.0 * s).toFixed(2), 0.9));
+      }
+      elements.push(h.symLine(ol.tX, ol.tY, ol.tX + 5, ol.tY + 4, p.ink, (1.2 * s).toFixed(2), 1.0));
+    });
+
+    for (var si = 0; si < 10; si++) {
+      var st = si / 10;
+      var curAY = abdoY0 + st * abdoH;
+      var segH = (abdoH / 10) * 0.95;
+      var flare = (si <= 1 ? 1.25 : (si >= 7 ? 1.18 : 0.82));
+      var segW = (abdoW * flare - st * 2.2);
+
+      var segCoords = [
+        [0, curAY],
+        [segW * 0.76, curAY + 2],
+        [segW, curAY + segH * 0.5],
+        [segW * 0.82, curAY + segH],
+        [0, curAY + segH]
+      ];
+      elements.push(h.symPath(segCoords, true, p.chitin, p.ink, (1.05 * s).toFixed(2), 0.98));
+      elements.push(h.symLine(0, curAY + 1, 0, curAY + segH - 1, p.paper, (0.7 * s).toFixed(2), 0.6));
+      elements.push(h.symLine(0, curAY + segH, segW * 0.82, curAY + segH, p.ink, (0.65 * s).toFixed(2), 0.7));
+      elements.push(h.symLine(segW * 0.45, curAY + 2, segW * 0.5, curAY + segH - 2, p.accent, (0.85 * s).toFixed(2), 0.85));
+    }
+
+    var s10Y = abdoY0 + abdoH;
+    elements.push(h.symLine(2, s10Y, 7, s10Y + 20, p.ink, (1.6 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(7, s10Y + 20, 3, s10Y + 28, p.ink, (1.3 * s).toFixed(2), 1.0));
+    elements.push(h.symLine(0, s10Y + 2, 0, s10Y + 16, p.accent, (1.2 * s).toFixed(2), 0.85));
+
+    return elements;
+  }
+
+  // Main Generator Function
   function generateInsectPaths(specimen, p) {
     var rng = Mulberry32(specimen.hashVal);
     var cx = specimen.cx;
     var cy = specimen.cy;
     var s = specimen.scaleFactor;
     var order = specimen.order;
-    var taxon = specimen.taxon;
+
+    var pinY = cy - 10 * s;
+
+    var h = {
+      cx: cx,
+      cy: cy,
+      s: s,
+      rng: rng,
+      symPath: function (coords, isClosed, fill, stroke, strokeWidth, strokeOpacity, fillOpacity) {
+        fill = fill || "none";
+        stroke = stroke || p.ink;
+        strokeWidth = strokeWidth || (1.0 * s).toFixed(2);
+        strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
+        fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
+
+        var dRight = "M " + (cx + coords[0][0] * s).toFixed(2) + " " + (coords[0][1] * s).toFixed(2);
+        for (var i = 1; i < coords.length; i++) {
+          dRight += " L " + (cx + coords[i][0] * s).toFixed(2) + " " + (coords[i][1] * s).toFixed(2);
+        }
+        if (isClosed) dRight += " Z";
+
+        var dLeft = "M " + (cx - coords[0][0] * s).toFixed(2) + " " + (coords[0][1] * s).toFixed(2);
+        for (var j = 1; j < coords.length; j++) {
+          dLeft += " L " + (cx - coords[j][0] * s).toFixed(2) + " " + (coords[j][1] * s).toFixed(2);
+        }
+        if (isClosed) dLeft += " Z";
+
+        return '<path d="' + dRight + ' ' + dLeft + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '" stroke-linecap="round" stroke-linejoin="round" />';
+      },
+      symCubic: function (dRightCommand, dLeftCommand, fill, stroke, strokeWidth, strokeOpacity, fillOpacity) {
+        fill = fill || "none";
+        stroke = stroke || p.ink;
+        strokeWidth = strokeWidth || (1.0 * s).toFixed(2);
+        strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
+        fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
+        return '<path d="' + dRightCommand + ' ' + dLeftCommand + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '" stroke-linecap="round" stroke-linejoin="round" />';
+      },
+      symLine: function (x1, y1, x2, y2, stroke, strokeWidth, strokeOpacity, dash) {
+        stroke = stroke || p.ink;
+        strokeWidth = strokeWidth || (0.8 * s).toFixed(2);
+        strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
+        var dashAttr = dash ? ' stroke-dasharray="' + dash + '"' : '';
+
+        return '<line x1="' + (cx + x1 * s).toFixed(2) + '" y1="' + (y1 * s).toFixed(2) + '" x2="' + (cx + x2 * s).toFixed(2) + '" y2="' + (y2 * s).toFixed(2) + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '"' + dashAttr + ' stroke-linecap="round" />\n' +
+               '<line x1="' + (cx - x1 * s).toFixed(2) + '" y1="' + (y1 * s).toFixed(2) + '" x2="' + (cx - x2 * s).toFixed(2) + '" y2="' + (y2 * s).toFixed(2) + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '"' + dashAttr + ' stroke-linecap="round" />';
+      },
+      symCircle: function (x, y, r, fill, stroke, strokeWidth, fillOpacity) {
+        fill = fill || p.ink;
+        stroke = stroke || "none";
+        strokeWidth = strokeWidth || 0;
+        fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
+        return '<circle cx="' + (cx + x * s).toFixed(2) + '" cy="' + (y * s).toFixed(2) + '" r="' + (r * s).toFixed(2) + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" />\n' +
+               '<circle cx="' + (cx - x * s).toFixed(2) + '" cy="' + (y * s).toFixed(2) + '" r="' + (r * s).toFixed(2) + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" />';
+      },
+      symHatch: function (startX, endX, y0, y1, linesCount, strokeWidth, opacity) {
+        var res = [];
+        strokeWidth = strokeWidth || (0.55 * s).toFixed(2);
+        opacity = opacity || 0.45;
+        for (var i = 0; i < linesCount; i++) {
+          var t = i / (linesCount - 1 || 1);
+          var curY = y0 + (y1 - y0) * t;
+          var xA = startX + (endX - startX) * (t * 0.6);
+          var xB = startX + (endX - startX) * t;
+          res.push(this.symLine(xA, curY - 2, xB, curY + 2, p.ink, strokeWidth, opacity));
+        }
+        return res.join("\n");
+      },
+      symStipple: function (centerX, centerY, rx, ry, count, dotR, opacity) {
+        var res = [];
+        dotR = dotR || 0.65;
+        opacity = opacity || 0.55;
+        for (var i = 0; i < count; i++) {
+          var angle = rng() * Math.PI * 2;
+          var rad = Math.sqrt(rng());
+          var px = centerX + Math.cos(angle) * rx * rad;
+          var py = centerY + Math.sin(angle) * ry * rad;
+          res.push(this.symCircle(px, py, dotR, p.ink, "none", 0, opacity));
+        }
+        return res.join("\n");
+      }
+    };
 
     var elements = [];
 
-    // Central Pin Mount Y Coordinate (mesothoracic disc)
-    var pinY = cy - 10 * s;
-
-    // Helper: Symmetrical Path String
-    function symPath(coords, isClosed, fill, stroke, strokeWidth, strokeOpacity, fillOpacity) {
-      fill = fill || "none";
-      stroke = stroke || p.ink;
-      strokeWidth = strokeWidth || (1.0 * s).toFixed(2);
-      strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
-      fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
-
-      // Right half
-      var dRight = "M " + (cx + coords[0][0] * s).toFixed(2) + " " + (coords[0][1] * s).toFixed(2);
-      for (var i = 1; i < coords.length; i++) {
-        dRight += " L " + (cx + coords[i][0] * s).toFixed(2) + " " + (coords[i][1] * s).toFixed(2);
-      }
-      if (isClosed) dRight += " Z";
-
-      // Left half
-      var dLeft = "M " + (cx - coords[0][0] * s).toFixed(2) + " " + (coords[0][1] * s).toFixed(2);
-      for (var j = 1; j < coords.length; j++) {
-        dLeft += " L " + (cx - coords[j][0] * s).toFixed(2) + " " + (coords[j][1] * s).toFixed(2);
-      }
-      if (isClosed) dLeft += " Z";
-
-      return '<path d="' + dRight + ' ' + dLeft + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '" stroke-linecap="round" stroke-linejoin="round" />';
-    }
-
-    // Helper: Curved Symmetrical Smooth Bezier
-    function symCubic(dRightCommand, dLeftCommand, fill, stroke, strokeWidth, strokeOpacity, fillOpacity) {
-      fill = fill || "none";
-      stroke = stroke || p.ink;
-      strokeWidth = strokeWidth || (1.0 * s).toFixed(2);
-      strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
-      fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
-      return '<path d="' + dRightCommand + ' ' + dLeftCommand + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '" stroke-linecap="round" stroke-linejoin="round" />';
-    }
-
-    // Helper: Symmetrical Line
-    function symLine(x1, y1, x2, y2, stroke, strokeWidth, strokeOpacity, dash) {
-      stroke = stroke || p.ink;
-      strokeWidth = strokeWidth || (0.8 * s).toFixed(2);
-      strokeOpacity = strokeOpacity !== undefined ? strokeOpacity : 1.0;
-      var dashAttr = dash ? ' stroke-dasharray="' + dash + '"' : '';
-
-      return '<line x1="' + (cx + x1 * s).toFixed(2) + '" y1="' + (y1 * s).toFixed(2) + '" x2="' + (cx + x2 * s).toFixed(2) + '" y2="' + (y2 * s).toFixed(2) + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '"' + dashAttr + ' stroke-linecap="round" />\n' +
-             '<line x1="' + (cx - x1 * s).toFixed(2) + '" y1="' + (y1 * s).toFixed(2) + '" x2="' + (cx - x2 * s).toFixed(2) + '" y2="' + (y2 * s).toFixed(2) + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" stroke-opacity="' + strokeOpacity + '"' + dashAttr + ' stroke-linecap="round" />';
-    }
-
-    // Helper: Symmetrical Circle
-    function symCircle(x, y, r, fill, stroke, strokeWidth, fillOpacity) {
-      fill = fill || p.ink;
-      stroke = stroke || "none";
-      strokeWidth = strokeWidth || 0;
-      fillOpacity = fillOpacity !== undefined ? fillOpacity : 1.0;
-      return '<circle cx="' + (cx + x * s).toFixed(2) + '" cy="' + (y * s).toFixed(2) + '" r="' + (r * s).toFixed(2) + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" />\n' +
-             '<circle cx="' + (cx - x * s).toFixed(2) + '" cy="' + (y * s).toFixed(2) + '" r="' + (r * s).toFixed(2) + '" fill="' + fill + '" fill-opacity="' + fillOpacity + '" stroke="' + stroke + '" stroke-width="' + strokeWidth + '" />';
-    }
-
-    // Helper: Copperplate Engraving Hatching on Chitin Plate
-    function symHatch(startX, endX, y0, y1, linesCount, strokeWidth, opacity) {
-      var res = [];
-      strokeWidth = strokeWidth || (0.55 * s).toFixed(2);
-      opacity = opacity || 0.45;
-      for (var i = 0; i < linesCount; i++) {
-        var t = i / (linesCount - 1 || 1);
-        var curY = y0 + (y1 - y0) * t;
-        var xA = startX + (endX - startX) * (t * 0.6);
-        var xB = startX + (endX - startX) * t;
-        res.push(symLine(xA, curY - 2, xB, curY + 2, p.ink, strokeWidth, opacity));
-      }
-      return res.join("\n");
-    }
-
-    // =========================================================================
-    // ORDER 1: COLEOPTERA (Beetles - Lucanidae, Scarabaeidae, Cerambycidae)
-    // =========================================================================
     if (order === 'coleoptera') {
-      var isHorned = taxon.morphology === 'horned_dynastes' || taxon.morphology === 'horned_atlas';
-      var isStag = taxon.morphology === 'stag_lucanus';
-      var isLonghorn = taxon.morphology === 'longhorn_cerambyx';
-
-      var bL = specimen.bodyLength / s;
-      var pronoW = 46 + rng() * 12;
-      var pronoH = 34 + rng() * 8;
-      var pronoY = pinY / s - 16;
-
-      var headW = isStag ? 38 + rng() * 8 : (isHorned ? 26 + rng() * 6 : 24 + rng() * 4);
-      var headH = 22 + rng() * 6;
-      var headY = pronoY - pronoH * 0.5 - headH * 0.45;
-
-      var elyW = pronoW * 1.25;
-      var elyH = bL * 0.62;
-      var abdoY0 = pronoY + pronoH * 0.5;
-
-      // 1. Mandibles / Cephalic Horns
-      if (isStag) {
-        // Massive branched stag beetle mandibles
-        var manLen = 55 + rng() * 30;
-        var mC1 = [
-          [headW * 0.35, headY - headH * 0.4],
-          [headW * 0.55, headY - headH * 0.7],
-          [headW * 0.68, headY - headH * 0.7 - manLen * 0.5],
-          [headW * 0.52, headY - headH * 0.7 - manLen * 0.85],
-          [headW * 0.15, headY - headH * 0.7 - manLen], // Pincer Tip
-          [headW * 0.35, headY - headH * 0.7 - manLen * 0.8],
-          [headW * 0.42, headY - headH * 0.7 - manLen * 0.45],
-          [headW * 0.22, headY - headH * 0.7 - manLen * 0.25],
-          [headW * 0.18, headY - headH * 0.4]
-        ];
-        elements.push(symPath(mC1, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
-        // Inner Serrate Teeth
-        for (var mi = 1; mi <= 4; mi++) {
-          var mt = mi / 5;
-          var tX = (headW * 0.45 - mt * (headW * 0.3));
-          var tY = (headY - headH * 0.7 - manLen * mt);
-          elements.push(symLine(tX, tY, tX - 6, tY + 2, p.ink, (1.0 * s).toFixed(2), 0.9));
-        }
-      } else if (isHorned) {
-        // Dynastes / Atlas Horns: Cephalic Horn & Pronotal Horn
-        var hLen = 65 + rng() * 35;
-        // Cephalic horn (from head)
-        var chCoords = [
-          [headW * 0.18, headY - headH * 0.4],
-          [headW * 0.22, headY - headH * 0.8],
-          [headW * 0.14, headY - headH * 0.8 - hLen * 0.7],
-          [0, headY - headH * 0.8 - hLen], // Curved Tip
-          [headW * 0.06, headY - headH * 0.8 - hLen * 0.65],
-          [headW * 0.08, headY - headH * 0.4]
-        ];
-        elements.push(symPath(chCoords, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
-
-        // Pronotal Horn (massive overarching horn)
-        var prHCoords = [
-          [headW * 0.15, pronoY - pronoH * 0.3],
-          [headW * 0.18, pronoY - pronoH * 0.7],
-          [headW * 0.12, headY - headH * 0.8 - hLen * 0.95],
-          [0, headY - headH * 0.8 - hLen * 1.15],
-          [headW * 0.04, headY - headH * 0.8 - hLen * 0.9],
-          [headW * 0.08, pronoY - pronoH * 0.3]
-        ];
-        elements.push(symPath(prHCoords, true, p.chitinLight, p.ink, (1.3 * s).toFixed(2), 1.0));
-        // Velvet setae fringe under pronotal horn
-        for (var vsi = 1; vsi <= 8; vsi++) {
-          var vt = vsi / 9;
-          var vy = (pronoY - pronoH * 0.6) - vt * (hLen * 0.85);
-          elements.push(symLine(headW * 0.06, vy, headW * 0.06 + 3, vy + 2, p.accent, (0.75 * s).toFixed(2), 0.85));
-        }
-      } else {
-        // Standard dentate mandibles & sensory palpi
-        var manCoords = [
-          [headW * 0.2, headY - headH * 0.5],
-          [headW * 0.32, headY - headH * 0.85],
-          [headW * 0.05, headY - headH * 1.1],
-          [headW * 0.15, headY - headH * 0.75],
-          [headW * 0.08, headY - headH * 0.5]
-        ];
-        elements.push(symPath(manCoords, true, p.chitin, p.ink, (1.1 * s).toFixed(2), 1.0));
-        // 4 Segmented Sensory Palpi
-        elements.push(symLine(headW * 0.15, headY - headH * 0.5, headW * 0.28, headY - headH * 0.8, p.ink, (0.8 * s).toFixed(2), 0.9));
-        elements.push(symLine(headW * 0.28, headY - headH * 0.8, headW * 0.22, headY - headH * 1.05, p.ink, (0.8 * s).toFixed(2), 0.9));
-      }
-
-      // 2. Head Capsule (Epicranium, Clypeus)
-      var headCoords = [
-        [0, headY - headH * 0.5],
-        [headW * 0.45, headY - headH * 0.45],
-        [headW * 0.8, headY - headH * 0.1],
-        [headW * 0.75, headY + headH * 0.45],
-        [headW * 0.3, headY + headH * 0.5],
-        [0, headY + headH * 0.52]
-      ];
-      elements.push(symPath(headCoords, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
-      // Epicranial suture line & frontal carina
-      elements.push(symLine(0, headY - headH * 0.4, 0, headY + headH * 0.35, p.ink, (0.8 * s).toFixed(2), 0.85));
-      elements.push(symLine(headW * 0.2, headY - headH * 0.1, headW * 0.45, headY + headH * 0.15, p.ink, (0.6 * s).toFixed(2), 0.6));
-
-      // 3. Compound Eyes (Canthus dividing ommatidia)
-      var eyeR = 6.5;
-      var eyeX = headW * 0.72;
-      var eyeY = headY;
-      elements.push(symCircle(eyeX, eyeY, eyeR, p.paper, p.ink, (1.0 * s).toFixed(2)));
-      // Ommatidia hexagonal facet stippling
-      for (var fxi = -2; fxi <= 2; fxi++) {
-        for (var fyi = -2; fyi <= 2; fyi++) {
-          if (fxi * fxi + fyi * fyi <= 4) {
-            elements.push(symCircle(eyeX + fxi * 1.8, eyeY + fyi * 1.8, 0.45, p.ink, "none", 0, 0.85));
-          }
-        }
-      }
-
-      // 4. Antennae (Lamellate Scarab Fans or 11-Annulate Longhorn Whips)
-      var antBaseX = headW * 0.5;
-      var antBaseY = headY - headH * 0.1;
-      if (isLonghorn) {
-        // Enormous sweeping longhorn antennae
-        var antPts = [
-          [antBaseX, antBaseY],
-          [antBaseX + 35, antBaseY - 25],
-          [antBaseX + 75, antBaseY - 45],
-          [antBaseX + 115, antBaseY - 25],
-          [antBaseX + 140, antBaseY + 30],
-          [antBaseX + 145, antBaseY + 95]
-        ];
-        var dR = "M " + (cx + antPts[0][0] * s).toFixed(2) + " " + (antPts[0][1] * s).toFixed(2);
-        var dL = "M " + (cx - antPts[0][0] * s).toFixed(2) + " " + (antPts[0][1] * s).toFixed(2);
-        for (var api = 1; api < antPts.length; api++) {
-          dR += " L " + (cx + antPts[api][0] * s).toFixed(2) + " " + (antPts[api][1] * s).toFixed(2);
-          dL += " L " + (cx - antPts[api][0] * s).toFixed(2) + " " + (antPts[api][1] * s).toFixed(2);
-          // Articulated node swellings
-          elements.push(symCircle(antPts[api][0], antPts[api][1], 1.6, p.chitin, p.ink, (0.8 * s).toFixed(2)));
-        }
-        elements.push('<path d="' + dR + ' ' + dL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (1.2 * s).toFixed(2) + '" stroke-linecap="round" />');
-      } else {
-        // Lamellate Scarab Antenna (Scape + funicle + fanned leaves)
-        var antMidX = antBaseX + 22;
-        var antMidY = antBaseY - 32;
-        var antTipX = antBaseX + 38;
-        var antTipY = antBaseY - 55;
-        elements.push(symLine(antBaseX, antBaseY, antMidX, antMidY, p.ink, (1.2 * s).toFixed(2), 0.95));
-        elements.push(symLine(antMidX, antMidY, antTipX, antTipY, p.ink, (1.1 * s).toFixed(2), 0.95));
-        // 5 Fanned Lamellar Leaf Blades
-        for (var li = 0; li < 5; li++) {
-          var lx = antTipX + li * 4.5;
-          var ly = antTipY - li * 2.5;
-          elements.push(symLine(antTipX, antTipY, lx + 16, ly - 8, p.ink, (1.0 * s).toFixed(2), 0.9));
-        }
-      }
-
-      // 5. Pronotum (Sculpted Prothoracic Shield)
-      var pronoCoords = [
-        [0, pronoY - pronoH * 0.52],
-        [pronoW * 0.45, pronoY - pronoH * 0.48],
-        [pronoW * 0.88, pronoY - pronoH * 0.3],
-        [pronoW * 0.98, pronoY + pronoH * 0.15],
-        [pronoW * 0.82, pronoY + pronoH * 0.48],
-        [pronoW * 0.35, pronoY + pronoH * 0.52],
-        [0, pronoY + pronoH * 0.54]
-      ];
-      elements.push(symPath(pronoCoords, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
-      // Pronotal median sulcus & lateral marginal bead
-      elements.push(symLine(0, pronoY - pronoH * 0.48, 0, pronoY + pronoH * 0.5, p.ink, (1.0 * s).toFixed(2), 0.85));
-      elements.push(symHatch(pronoW * 0.25, pronoW * 0.85, pronoY - pronoH * 0.25, pronoY + pronoH * 0.25, 7, (0.5 * s).toFixed(2), 0.45));
-
-      // 6. Scutellum (Central Triangular Inter-Elytral Shield)
-      var scuCoords = [
-        [0, abdoY0],
-        [14, abdoY0 + 2],
-        [0, abdoY0 + 20]
-      ];
-      elements.push(symPath(scuCoords, true, p.chitinLight, p.ink, (1.1 * s).toFixed(2), 1.0));
-      elements.push(symLine(0, abdoY0 + 4, 0, abdoY0 + 17, p.ink, (0.7 * s).toFixed(2), 0.7));
-
-      // 7. Robust Segmented Legs (Coxa, Trochanter, Muscular Femur, Serrated Tibia, 5 Tarsomeres, Ungues)
-      var legConfigs = [
-        { name: "Prothoracic", rootY: pronoY - 4, kneeX: 65, kneeY: pronoY - 38, tibX: 95, tibY: pronoY - 65, tarX: 110, tarY: pronoY - 95, spines: 4 },
-        { name: "Mesothoracic", rootY: pinY + 6, kneeX: 85, kneeY: pinY - 10, tibX: 125, tibY: pinY + 15, tarX: 145, tarY: pinY + 45, spines: 3 },
-        { name: "Metathoracic", rootY: abdoY0 + 25, kneeX: 95, kneeY: abdoY0 + 65, tibX: 135, tibY: abdoY0 + 125, tarX: 155, tarY: abdoY0 + 175, spines: 3 }
-      ];
-
-      legConfigs.forEach(function (leg) {
-        var rx = pronoW * 0.45;
-        // Muscular Femur (bulging contour)
-        var femW = 5.2;
-        elements.push(symLine(rx, leg.rootY, leg.kneeX, leg.kneeY, p.chitin, (femW * s).toFixed(2), 1.0));
-        elements.push(symLine(rx, leg.rootY, leg.kneeX, leg.kneeY, p.ink, (1.1 * s).toFixed(2), 0.9));
-        // Femoral contour shading
-        elements.push(symLine(rx + 10, leg.rootY + 2, leg.kneeX - 6, leg.kneeY + 2, p.ink, (0.6 * s).toFixed(2), 0.5));
-
-        // Spined Tibia
-        elements.push(symLine(leg.kneeX, leg.kneeY, leg.tibX, leg.tibY, p.ink, (3.2 * s).toFixed(2), 1.0));
-        // Fossorial Tibial Spines / Teeth
-        for (var si = 1; si <= leg.spines; si++) {
-          var st = si / (leg.spines + 1);
-          var sx = leg.kneeX + (leg.tibX - leg.kneeX) * st;
-          var sy = leg.kneeY + (leg.tibY - leg.kneeY) * st;
-          elements.push(symLine(sx, sy, sx + 7, sy - 3, p.ink, (1.2 * s).toFixed(2), 1.0));
-        }
-        // Terminal Tibial Calcaria (Spurs at distal joint)
-        elements.push(symLine(leg.tibX, leg.tibY, leg.tibX + 5, leg.tibY + 4, p.ink, (1.1 * s).toFixed(2), 0.95));
-
-        // 5 Articulated Tarsomeres
-        var curTarX = leg.tibX;
-        var curTarY = leg.tibY;
-        for (var ti = 1; ti <= 5; ti++) {
-          var nxtTarX = leg.tibX + (leg.tarX - leg.tibX) * (ti / 5);
-          var nxtTarY = leg.tibY + (leg.tarY - leg.tibY) * (ti / 5);
-          var tarStroke = ti === 5 ? (1.2 * s) : (2.0 - ti * 0.2) * s;
-          elements.push(symLine(curTarX, curTarY, nxtTarX, nxtTarY, p.ink, tarStroke.toFixed(2), 1.0));
-          // Joint node
-          elements.push(symCircle(nxtTarX, nxtTarY, 1.1, p.ink, "none", 0, 0.9));
-          curTarX = nxtTarX;
-          curTarY = nxtTarY;
-        }
-
-        // Tarsal Claws (Ungues) & Pulvillus Pad
-        elements.push(symLine(curTarX, curTarY, curTarX + 6, curTarY - 4, p.ink, (1.0 * s).toFixed(2), 1.0));
-        elements.push(symLine(curTarX, curTarY, curTarX + 6, curTarY + 4, p.ink, (1.0 * s).toFixed(2), 1.0));
-        elements.push(symCircle(curTarX + 4, curTarY, 1.2, p.accent, "none", 0, 0.85));
-      });
-
-      // 8. Convex Hardened Elytra (Dorsal Wing Sheaths)
-      var elyCoords = [
-        [2, abdoY0 + 2],
-        [elyW * 0.45, abdoY0 + 6],
-        [elyW * 0.9, abdoY0 + elyH * 0.22],
-        [elyW, abdoY0 + elyH * 0.55],
-        [elyW * 0.88, abdoY0 + elyH * 0.82],
-        [elyW * 0.45, abdoY0 + elyH * 0.98],
-        [2, abdoY0 + elyH]
-      ];
-      elements.push(symPath(elyCoords, true, p.chitin, p.ink, (1.4 * s).toFixed(2), 1.0));
-
-      // Elytron Midline Suture
-      elements.push(symLine(0, abdoY0, 0, abdoY0 + elyH, p.ink, (1.3 * s).toFixed(2), 1.0));
-      elements.push(symLine(1.5, abdoY0 + 18, 1.5, abdoY0 + elyH - 4, p.ink, (0.5 * s).toFixed(2), 0.5));
-
-      // Humeral Callus (Prominent shoulder bump with concentric contour shading)
-      var humX = elyW * 0.65;
-      var humY = abdoY0 + 20;
-      elements.push(symCircle(humX, humY, 7.5, "none", p.ink, (0.6 * s).toFixed(2), 0.5));
-      elements.push(symCircle(humX, humY, 4.0, "none", p.ink, (0.6 * s).toFixed(2), 0.5));
-
-      // 10 Punctate Striae (Rows of microscopic puncture dots running longitudinally)
-      for (var strI = 1; strI <= 7; strI++) {
-        var strRatio = strI / 8;
-        var pX1 = elyW * strRatio * 0.48;
-        var pX2 = elyW * strRatio;
-        var pX3 = elyW * strRatio * 0.55;
-
-        // Curved longitudinal guide stroke
-        var dStrR = "M " + (cx + pX1 * s).toFixed(2) + " " + ((abdoY0 + 12) * s).toFixed(2) +
-                    " Q " + (cx + pX2 * s).toFixed(2) + " " + ((abdoY0 + elyH * 0.5) * s).toFixed(2) +
-                    " " + (cx + pX3 * s).toFixed(2) + " " + ((abdoY0 + elyH - 12) * s).toFixed(2);
-        var dStrL = "M " + (cx - pX1 * s).toFixed(2) + " " + ((abdoY0 + 12) * s).toFixed(2) +
-                    " Q " + (cx - pX2 * s).toFixed(2) + " " + ((abdoY0 + elyH * 0.5) * s).toFixed(2) +
-                    " " + (cx - pX3 * s).toFixed(2) + " " + ((abdoY0 + elyH - 12) * s).toFixed(2);
-        elements.push('<path d="' + dStrR + ' ' + dStrL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.5 * s).toFixed(2) + '" stroke-opacity="0.35" stroke-dasharray="1.5,2.5" />');
-
-        // Puncture Dots along the stria
-        for (var pdi = 1; pdi <= 9; pdi++) {
-          var pdt = pdi / 10;
-          var curPx = pX1 * (1 - pdt) * (1 - pdt) + pX2 * 2 * (1 - pdt) * pdt + pX3 * pdt * pdt;
-          var curPy = (abdoY0 + 12) * (1 - pdt) * (1 - pdt) + (abdoY0 + elyH * 0.5) * 2 * (1 - pdt) * pdt + (abdoY0 + elyH - 12) * pdt * pdt;
-          elements.push(symCircle(curPx, curPy, 0.75, p.ink, "none", 0, 0.7));
-        }
-      }
-
-      // Pygidium (Exposed terminal abdomen tip)
-      var pygCoords = [
-        [0, abdoY0 + elyH - 2],
-        [elyW * 0.28, abdoY0 + elyH + 1],
-        [elyW * 0.18, abdoY0 + elyH + 14],
-        [0, abdoY0 + elyH + 18]
-      ];
-      elements.push(symPath(pygCoords, true, p.chitin, p.ink, (1.1 * s).toFixed(2), 1.0));
-      elements.push(symHatch(elyW * 0.05, elyW * 0.22, abdoY0 + elyH + 4, abdoY0 + elyH + 12, 4, (0.5 * s).toFixed(2), 0.5));
+      elements = drawColeoptera(specimen, p, cx, cy, pinY, s, rng, h);
+    } else if (order === 'lepidoptera') {
+      elements = drawLepidoptera(specimen, p, cx, cy, pinY, s, rng, h);
+    } else {
+      elements = drawOdonata(specimen, p, cx, cy, pinY, s, rng, h);
     }
 
-    // =========================================================================
-    // ORDER 2: LEPIDOPTERA (Butterflies & Moths - Papilionidae, Saturniidae)
-    // =========================================================================
-    else if (order === 'lepidoptera') {
-      var isTailed = taxon.morphology === 'tailed_papilio' || taxon.morphology === 'tailed_luna' || taxon.morphology === 'tailed_urania';
-      var isFalcate = taxon.morphology === 'falcate_saturniid' || taxon.morphology === 'falcate_birdwing' || taxon.morphology === 'falcate_leaf';
-
-      var bL = specimen.bodyLength / s;
-      var wingspanHalf = (specimen.wingspan * 0.5) / s;
-
-      var thoraxW = 20 + rng() * 6;
-      var thoraxH = 36 + rng() * 6;
-      var thoraxY = pinY / s;
-
-      var headW = 16 + rng() * 4;
-      var headH = 14 + rng() * 3;
-      var headY = thoraxY - thoraxH * 0.5 - headH * 0.5;
-
-      var abdoW = 18 + rng() * 4;
-      var abdoH = bL * 0.52;
-      var abdoY0 = thoraxY + thoraxH * 0.5;
-
-      // 1. Forewings (Grand Triangular / Falcate Alae Anteriores)
-      var fwSpan = wingspanHalf * 0.95;
-      var fwH = fwSpan * 0.68;
-      var fwRootY = thoraxY - 10;
-
-      // Forewing Perimeter Coordinates
-      var apexX = fwSpan;
-      var apexY = fwRootY - fwH * 0.72;
-      var tornusX = fwSpan * 0.68;
-      var tornusY = fwRootY + fwH * 0.42;
-
-      var fwCoords = [
-        [thoraxW * 0.4, fwRootY],
-        [fwSpan * 0.48, fwRootY - fwH * 0.62], // Costa curve
-        [apexX, apexY], // Apex
-        [fwSpan * 0.94, fwRootY - fwH * 0.3], // Termen outer margin
-        [fwSpan * 0.84, fwRootY + fwH * 0.12],
-        [tornusX, tornusY], // Tornus
-        [fwSpan * 0.35, tornusY + 4], // Dorsum inner margin
-        [thoraxW * 0.4, fwRootY + 12]
-      ];
-      elements.push(symPath(fwCoords, true, p.wingTint, p.ink, (1.4 * s).toFixed(2), 0.98));
-
-      // 2. Hindwings (Alae Posteriores - Rounded or with Swallowtail Spatulate Tails)
-      var hwSpan = fwSpan * 0.68;
-      var hwH = fwH * 0.82;
-      var hwRootY = thoraxY + 8;
-
-      var hwCoords = [
-        [thoraxW * 0.35, hwRootY],
-        [hwSpan * 0.7, hwRootY + hwH * 0.25],
-        [hwSpan * 0.95, hwRootY + hwH * 0.65],
-        [hwSpan * 0.82, hwRootY + hwH * 0.95]
-      ];
-
-      if (isTailed) {
-        // Long Swallowtail Spatulate Tail
-        var tailLen = 42 + rng() * 25;
-        hwCoords.push([hwSpan * 0.75, hwRootY + hwH * 1.05 + tailLen * 0.5]);
-        hwCoords.push([hwSpan * 0.72, hwRootY + hwH * 1.05 + tailLen]); // Tail Tip
-        hwCoords.push([hwSpan * 0.64, hwRootY + hwH * 1.05 + tailLen * 0.7]);
-        hwCoords.push([hwSpan * 0.55, hwRootY + hwH * 1.02]);
-      } else {
-        hwCoords.push([hwSpan * 0.55, hwRootY + hwH * 1.08]);
-      }
-
-      hwCoords.push([hwSpan * 0.25, hwRootY + hwH * 0.96]);
-      hwCoords.push([thoraxW * 0.35, hwRootY + hwH * 0.65]);
-      elements.push(symPath(hwCoords, true, p.wingTint, p.ink, (1.3 * s).toFixed(2), 0.98));
-
-      // 3. Comstock-Needham Venation: Closed Discal Cell (Forewing & Hindwing)
-      var dcW = fwSpan * 0.38;
-      var dcH = fwH * 0.28;
-      var dcCoords = [
-        [thoraxW * 0.45, fwRootY],
-        [dcW * 0.7, fwRootY - dcH * 0.7],
-        [dcW, fwRootY - dcH * 0.1],
-        [dcW * 0.82, fwRootY + dcH * 0.55],
-        [thoraxW * 0.45, fwRootY + 8]
-      ];
-      elements.push(symPath(dcCoords, true, "none", p.ink, (1.1 * s).toFixed(2), 0.9));
-
-      // Radial Veins (R1, R2, R3, R4, R5) radiating to Costa and Apex
-      var radTargets = [
-        [fwSpan * 0.7, fwRootY - fwH * 0.68],
-        [fwSpan * 0.86, fwRootY - fwH * 0.6],
-        [apexX - 2, apexY + 2],
-        [fwSpan * 0.95, fwRootY - fwH * 0.15],
-        [fwSpan * 0.88, fwRootY + fwH * 0.05],
-        [tornusX, tornusY]
-      ];
-      radTargets.forEach(function (tgt) {
-        var dR = "M " + (cx + dcW * s).toFixed(2) + " " + ((fwRootY - dcH * 0.1) * s).toFixed(2) +
-                 " Q " + (cx + (tgt[0] * 0.7) * s).toFixed(2) + " " + ((tgt[1] * 0.85 + fwRootY * 0.15) * s).toFixed(2) +
-                 " " + (cx + tgt[0] * s).toFixed(2) + " " + (tgt[1] * s).toFixed(2);
-        var dL = "M " + (cx - dcW * s).toFixed(2) + " " + ((fwRootY - dcH * 0.1) * s).toFixed(2) +
-                 " Q " + (cx - (tgt[0] * 0.7) * s).toFixed(2) + " " + ((tgt[1] * 0.85 + fwRootY * 0.15) * s).toFixed(2) +
-                 " " + (cx - tgt[0] * s).toFixed(2) + " " + (tgt[1] * s).toFixed(2);
-        elements.push('<path d="' + dR + ' ' + dL + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.75 * s).toFixed(2) + '" stroke-opacity="0.85" />');
-      });
-
-      // Hindwing Venation Radiating from Basal Stem
-      var hwVeinTargets = [
-        [hwSpan * 0.75, hwRootY + hwH * 0.3],
-        [hwSpan * 0.92, hwRootY + hwH * 0.65],
-        [hwSpan * 0.78, hwRootY + hwH * 0.95],
-        [hwSpan * 0.52, hwRootY + hwH * 1.05]
-      ];
-      hwVeinTargets.forEach(function (htgt) {
-        elements.push(symLine(thoraxW * 0.35, hwRootY + 12, htgt[0], htgt[1], p.ink, (0.75 * s).toFixed(2), 0.8));
-      });
-
-      // 4. Concentric Ocelli (Eyespots) on Forewing & Hindwing
-      var ocX1 = fwSpan * 0.75;
-      var ocY1 = fwRootY - fwH * 0.08;
-      var ocR1 = 11.0;
-      elements.push(symCircle(ocX1, ocY1, ocR1, p.paper, p.ink, (1.2 * s).toFixed(2)));
-      elements.push(symCircle(ocX1, ocY1, ocR1 * 0.75, p.accent, p.ink, (0.8 * s).toFixed(2), 0.9));
-      elements.push(symCircle(ocX1, ocY1, ocR1 * 0.42, p.ink, "none", 0, 1.0));
-      elements.push(symCircle(ocX1 - 2.5, ocY1 - 2.5, 1.4, p.paper, "none", 0, 0.95)); // Specular highlight glint!
-
-      // Hindwing Ocellus
-      var ocX2 = hwSpan * 0.65;
-      var ocY2 = hwRootY + hwH * 0.62;
-      var ocR2 = 8.5;
-      elements.push(symCircle(ocX2, ocY2, ocR2, p.paper, p.ink, (1.1 * s).toFixed(2)));
-      elements.push(symCircle(ocX2, ocY2, ocR2 * 0.7, p.accent, "none", 0, 0.9));
-      elements.push(symCircle(ocX2, ocY2, ocR2 * 0.35, p.ink, "none", 0, 1.0));
-
-      // 5. Submarginal Scalloped Lunules (Crescents along Wing Margin)
-      for (var lui = 1; lui <= 6; lui++) {
-        var lut = lui / 7;
-        var lx = apexX + (tornusX - apexX) * lut;
-        var ly = apexY + (tornusY - apexY) * lut;
-        elements.push(symCircle(lx - 10, ly - 4, 3.2, "none", p.accent, (0.85 * s).toFixed(2), 0.85));
-      }
-
-      // 6. Micro-Striation Lithograph Wing Scale Hatching
-      for (var whi = 1; whi <= 10; whi++) {
-        var wht = whi / 11;
-        var wx1 = dcW + (fwSpan * 0.85 - dcW) * (wht * 0.4);
-        var wy1 = fwRootY - dcH * 0.4 + (fwH * 0.6) * (wht * 0.3);
-        var wx2 = dcW + (fwSpan * 0.85 - dcW) * wht;
-        var wy2 = fwRootY - dcH * 0.4 + (fwH * 0.6) * wht;
-        elements.push(symLine(wx1, wy1, wx2, wy2, p.ink, (0.45 * s).toFixed(2), 0.45, "2,3"));
-      }
-
-      // 7. Densely Pilose Thorax & Abdomen
-      var thCoords = [
-        [0, thoraxY - thoraxH * 0.5],
-        [thoraxW * 0.7, thoraxY - thoraxH * 0.35],
-        [thoraxW, thoraxY],
-        [thoraxW * 0.85, thoraxY + thoraxH * 0.4],
-        [0, thoraxY + thoraxH * 0.5]
-      ];
-      elements.push(symPath(thCoords, true, p.chitin, p.ink, (1.2 * s).toFixed(2), 1.0));
-      // Thoracic Pilosity (Fine hair setae hatching)
-      for (var thi = -4; thi <= 4; thi++) {
-        var ty = thoraxY + thi * 3.5;
-        elements.push(symLine(thoraxW * 0.3, ty, thoraxW * 0.95, ty + 2, p.ink, (0.6 * s).toFixed(2), 0.55));
-      }
-
-      // Abdomen: 8 Articulated Segments with Lateral Pleurite Rings
-      for (var asi = 0; asi < 8; asi++) {
-        var ast = asi / 8;
-        var curAY = abdoY0 + ast * abdoH;
-        var segH = (abdoH / 8) * 0.92;
-        var segW = (abdoW - ast * (abdoW * 0.55));
-        var abCoords = [
-          [0, curAY],
-          [segW * 0.8, curAY + 2],
-          [segW, curAY + segH * 0.5],
-          [segW * 0.75, curAY + segH],
-          [0, curAY + segH]
-        ];
-        elements.push(symPath(abCoords, true, p.chitin, p.ink, (0.9 * s).toFixed(2), 0.95));
-        elements.push(symLine(segW * 0.2, curAY + segH * 0.5, segW * 0.8, curAY + segH * 0.5, p.ink, (0.5 * s).toFixed(2), 0.4));
-      }
-
-      // 8. Head, Coiled Haustellum Proboscis & Feathery Plumose Antennae
-      var hdCoords = [
-        [0, headY - headH * 0.5],
-        [headW * 0.6, headY - headH * 0.3],
-        [headW * 0.85, headY + headH * 0.1],
-        [headW * 0.5, headY + headH * 0.5],
-        [0, headY + headH * 0.5]
-      ];
-      elements.push(symPath(hdCoords, true, p.chitin, p.ink, (1.1 * s).toFixed(2), 1.0));
-      // Compound Eyes
-      elements.push(symCircle(headW * 0.68, headY, 5.0, p.paper, p.ink, (1.0 * s).toFixed(2)));
-      elements.push(symCircle(headW * 0.68, headY, 2.0, p.ink, "none", 0, 0.9));
-
-      // Coiled Spiral Haustellum (Proboscis)
-      var probR = 8.0;
-      var py0 = headY - headH * 0.45;
-      elements.push('<path d="M ' + cx.toFixed(2) + ' ' + (py0 * s).toFixed(2) +
-                    ' C ' + (cx + probR * s).toFixed(2) + ' ' + ((py0 - probR * 0.5) * s).toFixed(2) +
-                    ', ' + (cx - probR * 0.8 * s).toFixed(2) + ' ' + ((py0 - probR * 1.5) * s).toFixed(2) +
-                    ', ' + cx.toFixed(2) + ' ' + ((py0 - probR * 2.2) * s).toFixed(2) + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (1.1 * s).toFixed(2) + '" />');
-
-      // Antennae: Bipectinate Plumose Feathered Shafts
-      var antBaseX = headW * 0.4;
-      var antBaseY = headY - headH * 0.3;
-      var antTipX = antBaseX + 55;
-      var antTipY = antBaseY - 65;
-
-      elements.push(symLine(antBaseX, antBaseY, antTipX, antTipY, p.ink, (1.2 * s).toFixed(2), 1.0));
-      // 24 Pairs of Feathery Rami with micro-cilia
-      for (var fbi = 1; fbi <= 20; fbi++) {
-        var fbt = fbi / 21;
-        var fpx = antBaseX + (antTipX - antBaseX) * fbt;
-        var fpy = antBaseY + (antTipY - antBaseY) * fbt;
-        var featherLen = Math.sin(fbt * Math.PI) * 16.0;
-        elements.push(symLine(fpx, fpy, fpx + featherLen, fpy - 3.5, p.ink, (0.75 * s).toFixed(2), 0.9));
-        elements.push(symLine(fpx, fpy, fpx - featherLen * 0.6, fpy - 2.5, p.ink, (0.65 * s).toFixed(2), 0.8));
-      }
-
-      // Delicate Legs folded beneath
-      var legYs = [thoraxY - 8, thoraxY + 4, thoraxY + 16];
-      legYs.forEach(function (ly, lidx) {
-        elements.push(symLine(thoraxW * 0.4, ly, thoraxW * 0.4 + 25 + lidx * 8, ly + 22, p.ink, (1.0 * s).toFixed(2), 0.85));
-        elements.push(symLine(thoraxW * 0.4 + 25 + lidx * 8, ly + 22, thoraxW * 0.4 + 42 + lidx * 12, ly + 48, p.ink, (0.8 * s).toFixed(2), 0.85));
-      });
-    }
-
-    // =========================================================================
-    // ORDER 3: ODONATA (Dragonflies - Aeshnidae, Libellulidae, Calopterygidae)
-    // =========================================================================
-    else {
-      var bL = specimen.bodyLength / s;
-      var wingspanHalf = (specimen.wingspan * 0.5) / s;
-
-      var thoraxW = 22 + rng() * 6;
-      var thoraxH = 38 + rng() * 6;
-      var thoraxY = pinY / s;
-
-      var headW = 34 + rng() * 6; // Colossal hemispherical eyes
-      var headH = 18 + rng() * 4;
-      var headY = thoraxY - thoraxH * 0.5 - headH * 0.4;
-
-      var abdoW = 11 + rng() * 3;
-      var abdoH = bL * 0.65;
-      var abdoY0 = thoraxY + thoraxH * 0.5;
-
-      // 1. Four Expansive Vitreous Wings (Forewing pair & Hindwing pair)
-      var wingPairs = [
-        { name: "Forewing", rootY: thoraxY - 14, span: wingspanHalf * 0.98, chord: wingspanHalf * 0.22, tilt: -10 },
-        { name: "Hindwing", rootY: thoraxY + 10, span: wingspanHalf * 0.94, chord: wingspanHalf * 0.26, tilt: 6 }
-      ];
-
-      wingPairs.forEach(function (wp) {
-        var wY = wp.rootY;
-        var span = wp.span;
-        var chord = wp.chord;
-        var tipX = span;
-        var tipY = wY + wp.tilt;
-        var nodusX = span * 0.48;
-        var nodusY = wY - chord * 0.42 + wp.tilt * 0.48;
-
-        // Wing Perimeter with authentic Nodus indentation
-        var wCoords = [
-          [thoraxW * 0.35, wY],
-          [nodusX * 0.85, wY - chord * 0.45 + wp.tilt * 0.4],
-          [nodusX, nodusY + 2], // Nodus notch
-          [nodusX * 1.08, nodusY - 2],
-          [tipX * 0.85, wY - chord * 0.38 + wp.tilt * 0.85],
-          [tipX, tipY], // Apex
-          [tipX * 0.94, wY + chord * 0.32 + wp.tilt * 0.94],
-          [span * 0.65, wY + chord * 0.52 + wp.tilt * 0.65],
-          [span * 0.28, wY + chord * 0.48 + wp.tilt * 0.28],
-          [thoraxW * 0.35, wY + 6]
-        ];
-        elements.push(symPath(wCoords, true, p.wingTint, p.ink, (1.3 * s).toFixed(2), 0.98));
-
-        // Pterostigma (Opaque Rectangular Cell near Apex)
-        var ptX = span * 0.82;
-        var ptY = wY - chord * 0.32 + wp.tilt * 0.82;
-        var ptW = 16.0;
-        var ptH = 4.2;
-        elements.push('<rect x="' + (cx + ptX * s).toFixed(2) + '" y="' + (ptY * s).toFixed(2) + '" width="' + (ptW * s).toFixed(2) + '" height="' + (ptH * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (0.9 * s).toFixed(2) + '" />\n' +
-                      '<rect x="' + (cx - (ptX + ptW) * s).toFixed(2) + '" y="' + (ptY * s).toFixed(2) + '" width="' + (ptW * s).toFixed(2) + '" height="' + (ptH * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (0.9 * s).toFixed(2) + '" />');
-        // Pterostigma micro-hatching
-        for (var pti = 1; pti <= 4; pti++) {
-          elements.push(symLine(ptX + pti * 3.2, ptY, ptX + pti * 3.2 - 2, ptY + ptH, p.paper, (0.55 * s).toFixed(2), 0.65));
-        }
-
-        // Primary Longitudinal Veins: Costa, Subcosta, Radius, Media, Cubitus
-        for (var vi = 1; vi <= 5; vi++) {
-          var vt = (vi - 3) / 2.5;
-          var vyOff = vt * (chord * 0.32);
-          var vD_R = "M " + (cx + thoraxW * 0.35 * s).toFixed(2) + " " + (wY * s).toFixed(2) +
-                     " Q " + (cx + span * 0.5 * s).toFixed(2) + " " + ((wY + vyOff + wp.tilt * 0.5) * s).toFixed(2) +
-                     " " + (cx + (tipX - 4) * s).toFixed(2) + " " + ((tipY + vyOff * 0.3) * s).toFixed(2);
-          var vD_L = "M " + (cx - thoraxW * 0.35 * s).toFixed(2) + " " + (wY * s).toFixed(2) +
-                     " Q " + (cx - span * 0.5 * s).toFixed(2) + " " + ((wY + vyOff + wp.tilt * 0.5) * s).toFixed(2) +
-                     " " + (cx - (tipX - 4) * s).toFixed(2) + " " + ((tipY + vyOff * 0.3) * s).toFixed(2);
-          elements.push('<path d="' + vD_R + ' ' + vD_L + '" fill="none" stroke="' + p.ink + '" stroke-width="' + (0.8 * s).toFixed(2) + '" stroke-opacity="0.88" />');
-        }
-
-        // Discoidal Triangle & Supratriangle near Wing Base
-        var triCoords = [
-          [thoraxW * 0.35 + 14, wY + 1],
-          [thoraxW * 0.35 + 26, wY + chord * 0.22],
-          [thoraxW * 0.35 + 18, wY + chord * 0.35]
-        ];
-        elements.push(symPath(triCoords, true, "none", p.ink, (1.0 * s).toFixed(2), 0.95));
-
-        // High-Density Voronoi / Reticulated Crossveins (36 Crossveins per wing)
-        for (var cvi = 1; cvi <= 36; cvi++) {
-          var cvt = cvi / 37;
-          var cvx = thoraxW * 0.4 + span * 0.58 * cvt;
-          var cvyTop = wY - chord * 0.35 + wp.tilt * cvt;
-          var cvyBot = wY + chord * 0.42 + wp.tilt * cvt;
-          var slant = (cvi % 2 === 0 ? 2.5 : -2.5);
-          elements.push(symLine(cvx, cvyTop, cvx + slant, cvyBot, p.ink, (0.45 * s).toFixed(2), 0.55));
-        }
-      });
-
-      // 2. Head Capsule & Colossal Hemispherical Compound Eyes
-      var eyeR = 12.0;
-      var eyeX = headW * 0.48;
-      var eyeY = headY;
-      // Dual huge compound eyes meeting at coronal seam
-      elements.push(symCircle(eyeX, eyeY, eyeR, p.paper, p.ink, (1.2 * s).toFixed(2)));
-      // Hexagonal ommatidial facet network
-      for (var oxi = -3; oxi <= 3; oxi++) {
-        for (var oyi = -3; oyi <= 3; oyi++) {
-          if (oxi * oxi + oyi * oyi <= 9) {
-            elements.push(symCircle(eyeX + oxi * 2.5, eyeY + oyi * 2.5, 0.65, p.ink, "none", 0, 0.75));
-          }
-        }
-      }
-      // Epicranial seam connecting eyes
-      elements.push(symLine(0, eyeY - eyeR * 0.8, 0, eyeY + eyeR * 0.8, p.ink, (1.1 * s).toFixed(2), 0.9));
-
-      // 3 Dorsal Ocelli (Median Simple Eyes on Vertex Triangle)
-      elements.push('<circle cx="' + cx.toFixed(2) + '" cy="' + ((eyeY - 7) * s).toFixed(2) + '" r="' + (1.6 * s).toFixed(2) + '" fill="' + p.accent + '" stroke="' + p.ink + '" stroke-width="' + (0.6 * s).toFixed(2) + '" />');
-      elements.push(symCircle(4.5, eyeY - 3, 1.4, p.accent, p.ink, (0.6 * s).toFixed(2)));
-
-      // Minute Sensory Bristle Antennae
-      elements.push(symLine(6.0, eyeY - 8, 11.0, eyeY - 18, p.ink, (0.9 * s).toFixed(2), 0.95));
-
-      // 3. Muscular Synthorax (Pterothorax) with Antehumeral Sclerite Stripes
-      var thxCoords = [
-        [0, thoraxY - thoraxH * 0.5],
-        [thoraxW * 0.55, thoraxY - thoraxH * 0.45],
-        [thoraxW * 0.95, thoraxY - thoraxH * 0.1],
-        [thoraxW, thoraxY + thoraxH * 0.35],
-        [thoraxW * 0.4, thoraxY + thoraxH * 0.5],
-        [0, thoraxY + thoraxH * 0.52]
-      ];
-      elements.push(symPath(thxCoords, true, p.chitin, p.ink, (1.3 * s).toFixed(2), 1.0));
-      // Antehumeral Stripes & Pleural Suture
-      elements.push(symLine(thoraxW * 0.3, thoraxY - thoraxH * 0.35, thoraxW * 0.65, thoraxY + thoraxH * 0.3, p.accent, (1.8 * s).toFixed(2), 0.85));
-      elements.push(symLine(thoraxW * 0.5, thoraxY - thoraxH * 0.3, thoraxW * 0.85, thoraxY + thoraxH * 0.25, p.ink, (0.9 * s).toFixed(2), 0.8));
-
-      // 4. Predatory Basket Legs (armed with double rows of stiff spines)
-      var odLegs = [
-        { rY: thoraxY - 10, kX: 42, kY: thoraxY - 35, tX: 65, tY: thoraxY - 55 },
-        { rY: thoraxY + 2, kX: 52, kY: thoraxY + 15, tX: 82, tY: thoraxY + 45 },
-        { rY: thoraxY + 16, kX: 58, kY: thoraxY + 55, tX: 95, tY: thoraxY + 95 }
-      ];
-      odLegs.forEach(function (ol) {
-        elements.push(symLine(thoraxW * 0.4, ol.rY, ol.kX, ol.kY, p.ink, (2.6 * s).toFixed(2), 1.0));
-        elements.push(symLine(ol.kX, ol.kY, ol.tX, ol.tY, p.ink, (1.8 * s).toFixed(2), 1.0));
-        // Double row of predatory spines
-        for (var psi = 1; psi <= 4; psi++) {
-          var pst = psi / 5;
-          var px = ol.kX + (ol.tX - ol.kX) * pst;
-          var py = ol.kY + (ol.tY - ol.kY) * pst;
-          elements.push(symLine(px, py, px + 5, py - 3, p.ink, (1.0 * s).toFixed(2), 0.95));
-          elements.push(symLine(px, py, px - 3, py + 4, p.ink, (0.9 * s).toFixed(2), 0.85));
-        }
-      });
-
-      // 5. Elongated 10-Segmented Abdomen (S1 through S10) with Carina
-      for (var si = 0; si < 10; si++) {
-        var st = si / 10;
-        var curAY = abdoY0 + st * abdoH;
-        var segH = (abdoH / 10) * 0.94;
-        // Natural flare at S1-S2, slender waist S3-S7, dilation at S8-S10
-        var flare = (si <= 1 ? 1.2 : (si >= 7 ? 1.15 : 0.85));
-        var segW = (abdoW * flare - st * 2.0);
-
-        var segCoords = [
-          [0, curAY],
-          [segW * 0.75, curAY + 2],
-          [segW, curAY + segH * 0.5],
-          [segW * 0.8, curAY + segH],
-          [0, curAY + segH]
-        ];
-        elements.push(symPath(segCoords, true, p.chitin, p.ink, (1.0 * s).toFixed(2), 0.95));
-
-        // Lateral Carina & Transverse Ring
-        elements.push(symLine(0, curAY + segH, segW * 0.8, curAY + segH, p.ink, (0.6 * s).toFixed(2), 0.6));
-        elements.push(symLine(segW * 0.45, curAY + 2, segW * 0.5, curAY + segH - 2, p.accent, (0.8 * s).toFixed(2), 0.75));
-      }
-
-      // Terminal Caudal Claspers (Cerci & Paraprocts) at S10
-      var s10Y = abdoY0 + abdoH;
-      elements.push(symLine(2, s10Y, 6, s10Y + 18, p.ink, (1.5 * s).toFixed(2), 1.0));
-      elements.push(symLine(6, s10Y + 18, 3, s10Y + 24, p.ink, (1.2 * s).toFixed(2), 1.0));
-    }
-
-    // =========================================================================
-    // CABINET-OF-CURIOSITIES ENTOMOLOGICAL MOUNTING PIN
-    // =========================================================================
+    // Central Pin Mount Y Coordinate
     var pinHeadR = 4.8 * s;
     elements.push('  <!-- Central Enameled Brass Entomological Mounting Pin -->');
     elements.push('  <g class="entomological-pin" filter="drop-shadow(0px 3px 4px rgba(42,37,32,0.4))">');
